@@ -7,6 +7,7 @@ use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
+use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Http\Request;
@@ -94,6 +95,16 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [DeviceFaqController::class, 'update'])->name('faq.update');
                 Route::post('update-status', [DeviceFaqController::class, 'updateStatus'])->name('faq.change-status');
                 Route::delete('delete', [DeviceFaqController::class, 'destroy'])->name('faq.destroy');
+            });
+
+            // PLAN
+            Route::group(['prefix' => 'plan'], function () {
+                Route::get('datatable', [PlanController::class, 'dataTable'])->name('plan.datatable');
+                Route::get('{id}/detail', [PlanController::class, 'getDetail'])->name('plan.detail');
+                Route::post('create', [PlanController::class, 'create'])->name('plan.create');
+                Route::post('update', [PlanController::class, 'update'])->name('plan.update');
+                Route::post('update-status', [PlanController::class, 'updateStatus'])->name('plan.change-status');
+                Route::delete('delete', [PlanController::class, 'destroy'])->name('plan.destroy');
             });
         });
 

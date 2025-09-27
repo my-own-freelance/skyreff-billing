@@ -63,8 +63,8 @@
                         <p>Device FAQ</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'plan' ? 'active' : '' }}">
+                    <a href="{{ route('plan') }}">
                         <i class="fas fa-box-open"></i> {{-- Paket Plan --}}
                         <p>Paket Plan</p>
                     </a>

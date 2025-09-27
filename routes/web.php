@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
+use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Support\Facades\Route;
@@ -49,8 +50,9 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/owner', [OwnerController::class, 'index'])->name('owner');
             Route::get('/teknisi', [TeknisiController::class, 'index'])->name('teknisi');
             Route::get('/member', [MemberController::class, 'index'])->name('member');
-            Route::get("/device", action: [DeviceController::class, 'index'])->name('device');
-            Route::get("/faq", action: [DeviceFaqController::class, 'index'])->name('faq');
+            Route::get('/device', action: [DeviceController::class, 'index'])->name('device');
+            Route::get('/faq', action: [DeviceFaqController::class, 'index'])->name('faq');
+            Route::get('/plan', action: [PlanController::class, 'index'])->name('plan');
         });
 
         // PREFIX MANAGE
