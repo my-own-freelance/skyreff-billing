@@ -33,8 +33,8 @@
                         <p>Owner</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'teknisi' ? 'active' : '' }}">
+                    <a href="{{ route('teknisi') }}">
                         <i class="fas fa-user-cog"></i> {{-- Teknisi --}}
                         <p>Teknisi</p>
                     </a>
@@ -59,7 +59,7 @@
                 </li>
 
                 {{-- MANAGE --}}
-                <li class="nav-section">    
+                <li class="nav-section">
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
                     </span>

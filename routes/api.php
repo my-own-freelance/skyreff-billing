@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\OwnerController;
+use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,16 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [OwnerController::class, 'update'])->name('owner.update');
                 Route::post('update-status', [OwnerController::class, 'updateStatus'])->name('owner.change-status');
                 Route::post('delete', [OwnerController::class, 'destroy'])->name('owner.destroy');
+            });
+
+            // TEKNISI
+            Route::group(['prefix' => 'teknisi'], function () {
+                Route::get('datatable', [TeknisiController::class, 'dataTable'])->name('teknisi.datatable');
+                Route::get('{id}/detail', [TeknisiController::class, 'getDetail'])->name('teknisi.detail');
+                Route::post('create', [TeknisiController::class, 'create'])->name('teknisi.create');
+                Route::post('update', [TeknisiController::class, 'update'])->name('teknisi.update');
+                Route::post('update-status', [TeknisiController::class, 'updateStatus'])->name('teknisi.change-status');
+                Route::post('delete', [TeknisiController::class, 'destroy'])->name('teknisi.destroy');
             });
         });
     });

@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <h5 class="text-uppercase title">DATA OWNER</h5>
+                        <h5 class="text-uppercase title">DATA TEKNISI</h5>
                     </div>
                     <div class="card-header-right">
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
@@ -18,7 +18,7 @@
                 </div>
                 <div class="card-block">
                     <div class="table-responsive mt-3">
-                        <table class="table table-striped table-bordered nowrap dataTable" id="ownerDataTable">
+                        <table class="table table-striped table-bordered nowrap dataTable" id="teknisiDataTable">
                             <thead>
                                 <tr>
                                     <th class="all">#</th>
@@ -56,22 +56,22 @@
                         <div class="form-group">
                             <label for="name">Nama</label>
                             <input class="form-control" id="name" type="text" name="name"
-                                placeholder="masukkan nama owner" required />
+                                placeholder="masukkan nama teknisi" required />
                         </div>
                         <div class="form-group">
                             <label for="username">Username</label>
                             <input class="form-control" id="username" type="text" name="username"
-                                placeholder="masukkan username owner" required />
+                                placeholder="masukkan username teknisi" required />
                         </div>
                         <div class="form-group">
                             <label for="phone">Nomor Telpon</label>
                             <input class="form-control" id="phone" type="text" name="phone"
-                                placeholder="masukkan nomor telpon owner" required />
+                                placeholder="masukkan nomor telpon teknisi" required />
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
                             <input class="form-control" id="password" type="password" name="password"
-                                placeholder="masukkan password owner" />
+                                placeholder="masukkan password teknisi" />
                             <small class="text-warning">Min 5 Karakter</small>
                         </div>
                         <div class="form-group">
@@ -106,8 +106,8 @@
         })
 
         function dataTable() {
-            const url = "{{ route('owner.datatable') }}";
-            dTable = $("#ownerDataTable").DataTable({
+            const url = "{{ route('teknisi.datatable') }}";
+            dTable = $("#teknisiDataTable").DataTable({
                 searching: true,
                 orderng: true,
                 lengthChange: true,
@@ -155,7 +155,7 @@
 
         function getData(id) {
             $.ajax({
-                url: "{{ route('owner.detail', ['id' => ':id']) }}".replace(':id', id),
+                url: "{{ route('teknisi.detail', ['id' => ':id']) }}".replace(':id', id),
                 method: "GET",
                 dataType: "json",
                 success: function(res) {
@@ -205,7 +205,7 @@
 
         function saveData(data, action) {
             $.ajax({
-                url: action == "update" ? "{{ route('owner.update') }}" : "{{ route('owner.create') }}",
+                url: action == "update" ? "{{ route('teknisi.update') }}" : "{{ route('teknisi.create') }}",
                 contentType: false,
                 processData: false,
                 method: "POST",
@@ -233,7 +233,7 @@
             let c = confirm("Apakah anda yakin untuk menghapus data ini ?");
             if (c) {
                 $.ajax({
-                    url: "{{ route('owner.destroy') }}",
+                    url: "{{ route('teknisi.destroy') }}",
                     method: "POST",
                     data: {
                         id: id
@@ -256,7 +256,7 @@
 
         function updateStatusData(data) {
             $.ajax({
-                url: "{{ route('owner.change-status') }}",
+                url: "{{ route('teknisi.change-status') }}",
                 contentType: false,
                 processData: false,
                 method: "POST",
