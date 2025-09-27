@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
+use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\TeknisiController;
@@ -72,6 +73,16 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [MemberController::class, 'update'])->name('member.update');
                 Route::post('update-status', [MemberController::class, 'updateStatus'])->name('member.change-status');
                 Route::delete('delete', [MemberController::class, 'destroy'])->name('member.destroy');
+            });
+
+            // DEVICE
+            Route::group(['prefix' => 'device'], function () {
+                Route::get('datatable', [DeviceController::class, 'dataTable'])->name('device.datatable');
+                Route::get('{id}/detail', [DeviceController::class, 'getDetail'])->name('device.detail');
+                Route::post('create', [DeviceController::class, 'create'])->name('device.create');
+                Route::post('update', [DeviceController::class, 'update'])->name('device.update');
+                Route::post('update-status', [DeviceController::class, 'updateStatus'])->name('device.change-status');
+                Route::delete('delete', [DeviceController::class, 'destroy'])->name('device.destroy');
             });
         });
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\TeknisiController;
@@ -47,6 +48,8 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/owner', [OwnerController::class, 'index'])->name('owner');
             Route::get('/teknisi', [TeknisiController::class, 'index'])->name('teknisi');
             Route::get('/member', [MemberController::class, 'index'])->name('member');
+            Route::get("/device", action: [DeviceController::class, 'index'])->name('device');
+
         });
 
         // PREFIX MANAGE

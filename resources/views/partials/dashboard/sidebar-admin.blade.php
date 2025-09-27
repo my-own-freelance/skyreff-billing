@@ -51,8 +51,8 @@
                         <p>Member</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'device' ? 'active' : '' }}">
+                    <a href="{{ route('device') }}">
                         <i class="fas fa-server"></i> {{-- Device --}}
                         <p>Device</p>
                     </a>
