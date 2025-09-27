@@ -83,8 +83,8 @@
                         <p>Broadcast</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'announcement' ? 'active' : '' }}">
+                    <a href="{{ route('announcement') }}">
                         <i class="fas fa-bell"></i> {{-- Announcement --}}
                         <p>Announcement</p>
                     </a>

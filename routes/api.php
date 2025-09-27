@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\WebConfigController;
@@ -49,6 +50,19 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [TeknisiController::class, 'update'])->name('teknisi.update');
                 Route::post('update-status', [TeknisiController::class, 'updateStatus'])->name('teknisi.change-status');
                 Route::post('delete', [TeknisiController::class, 'destroy'])->name('teknisi.destroy');
+            });
+        });
+
+        // PREFIX MANAGE
+        Route::group(['prefix' => 'manage'], function () {
+            // ANNOUNCEMENT
+            Route::group(['prefix' => 'announcement'], function () {
+                Route::get('datatable', [AnnountcementController::class, 'dataTable'])->name('announcement.datatable');
+                Route::get('{id}/detail', [AnnountcementController::class, 'getDetail'])->name('announcement.detail');
+                Route::post('create', [AnnountcementController::class, 'create'])->name('announcement.create');
+                Route::post('update', [AnnountcementController::class, 'update'])->name('announcement.update');
+                Route::post('update-status', [AnnountcementController::class, 'updateStatus'])->name('announcement.change-status');
+                Route::delete('delete', [AnnountcementController::class, 'destroy'])->name('announcement.destroy');
             });
         });
     });

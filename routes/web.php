@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\TeknisiController;
@@ -38,9 +39,15 @@ Route::group(['middleware' => 'auth:web'], function () {
     Route::group(['middleware' => 'web.check.role:admin'], function () {
         Route::get('/web-config', [WebConfigController::class, 'index'])->name('web-config');
 
+        // PREFIX MASTER
         Route::group(['prefix' => 'master'], function () {
             Route::get('/owner', [OwnerController::class, 'index'])->name('owner');
             Route::get('/teknisi', [TeknisiController::class, 'index'])->name('teknisi');
+        });
+
+        // PREFIX MANAGE
+        Route::group(['prefix' => 'manage'], function () {
+            Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
         });
     });
     // ADMIN AND TEKNISI ACCESS
