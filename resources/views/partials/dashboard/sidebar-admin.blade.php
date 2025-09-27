@@ -15,140 +15,78 @@
                 </li>
                 <li class="nav-item ml-3 {{ $routename == 'dashboard' ? 'active' : '' }}">
                     <a href="{{ route('dashboard.admin') }}" aria-expanded="false">
-                        <i class="fas fa-home"></i>
+                        <i class="fas fa-tachometer-alt"></i> {{-- Dashboard --}}
                         <p>Dashboard</p>
                     </a>
                 </li>
-                {{-- <li class="nav-section">
+
+                {{-- MASTER --}}
+                <li class="nav-section">
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
                     </span>
                     <h4 class="text-section">MASTER</h4>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'bank' ? 'active' : '' }}">
-                    <a href="{{ route('bank') }}">
-                        <i class="fas fa-building"></i>
-                        <p>Bank</p>
+                <li class="nav-item ml-3 {{ $routename == 'user-access' ? 'active' : '' }}">
+                    <a href="#">
+                        <i class="fas fa-user-shield"></i> {{-- User Akses --}}
+                        <p>User Akses</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'banner' ? 'active' : '' }}">
-                    <a href="{{ route('banner') }}">
-                        <i class="fas fa-image"></i>
-                        <p>Banner</p>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-user-cog"></i> {{-- Teknisi --}}
+                        <p>Teknisi</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'information' ? 'active' : '' }}">
-                    <a href="{{ route('information') }}">
-                        <i class="fas fa-info-circle"></i>
-                        <p>Information</p>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-users"></i> {{-- Member --}}
+                        <p>Member</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'product-category' ? 'active' : '' }}">
-                    <a href="{{ route('product-category') }}">
-                        <i class="fas fa-tags"></i>
-                        <p>Kategori Produk</p>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-server"></i> {{-- Device --}}
+                        <p>Device</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'akrab' ? 'active' : '' }}">
-                    <a href="{{ route('akrab') }}">
-                        <i class="fas fa-store"></i>
-                        <p>Paket Akrab</p>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-box-open"></i> {{-- Paket Plan --}}
+                        <p>Paket Plan</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'product' ? 'active' : '' }}">
-                    <a href="{{ route('product') }}">
-                        <i class="fas fa-cubes"></i>
-                        <p>List Produk</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'reward' ? 'active' : '' }}">
-                    <a href="{{ route('reward') }}">
-                        <i class="fas fa-trophy"></i>
-                        <p>Reward</p>
-                    </a>
-                </li>
-                <li class="nav-section">
-                    <span class="sidebar-mini-icon">
-                        <i class="fa fa-ellipsis-h"></i>
-                    </span>
-                    <h4 class="text-section">Transaction</h4>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-topup' ? 'active' : '' }}">
-                    <a href="{{ route('trx-topup') }}">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <p>Topup Saldo</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-product' ? 'active' : '' }}">
-                    <a href="{{ route('trx-product') }}">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>Product</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-commission' ? 'active' : '' }}">
-                    <a href="{{ route('trx-commission') }}">
-                        <i class="fas fa-wallet"></i>
-                        <p>Tarik Komisi</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-debt' ? 'active' : '' }}">
-                    <a href="{{ route('trx-debt') }}">
-                        <i class="fas fa-exchange-alt"></i>
-                        <p>Pihutang</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-compensation' ? 'active' : '' }}">
-                    <a href="{{ route('trx-compensation') }}">
-                        <i class="fas fa-clipboard-list"></i>
-                        <p>Komplain Transaksi</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-reward' ? 'active' : '' }}">
-                    <a href="{{ route('trx-reward') }}">
-                        <i class="fas fa-gift"></i>
-                        <p>Hadiah</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'trx-upgrade' ? 'active' : '' }}">
-                    <a href="{{ route('trx-upgrade') }}">
-                        <i class="fas fa-arrow-up"></i>
-                        <p>Upgrade Akun</p>
-                    </a>
-                </li>
-                <li class="nav-section">
-                    <span class="sidebar-mini-icon">
-                        <i class="fa fa-ellipsis-h"></i>
-                    </span>
-                    <h4 class="text-section">Mutation</h4>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'mutation-topup' ? 'active' : '' }}">
-                    <a href="{{ route('mutation-topup') }}">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <p>Saldo Reseller</p>
-                    </a>
-                </li>
-                <li class="nav-item ml-3 {{ $routename == 'mutation-commission' ? 'active' : '' }}">
-                    <a href="{{ route('mutation-commission') }}">
-                        <i class="fas fa-wallet"></i>
-                        <p>Commission</p>
-                    </a>
-                </li>
+
+                {{-- MANAGE --}}
                 <li class="nav-section">
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
                     </span>
                     <h4 class="text-section">MANAGE</h4>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'reseller' ? 'active' : '' }}">
-                    <a href="{{ route('reseller') }}">
-                        <i class="fas fa-user-tag"></i>
-                        <p>Reseller</p>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-sync-alt"></i> {{-- Subscription --}}
+                        <p>Subscription</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'owner' ? 'active' : '' }}">
-                    <a href="{{ route('owner') }}">
-                        <i class="fas fa-user-tie"></i>
-                        <p>Owner</p>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-ticket-alt"></i> {{-- Ticket --}}
+                        <p>Ticket</p>
+                    </a>
+                </li>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-bullhorn"></i> {{-- Broadcast --}}
+                        <p>Broadcast</p>
+                    </a>
+                </li>
+                <li class="nav-item ml-3">
+                    <a href="#">
+                        <i class="fas fa-bell"></i> {{-- Announcement --}}
+                        <p>Announcement</p>
                     </a>
                 </li>
                 <li class="nav-item ml-3 {{ $routename == 'web-config' ? 'active' : '' }}">
@@ -157,12 +95,22 @@
                         <p>Setting Web</p>
                     </a>
                 </li>
+
+                {{-- TRANSACTION --}}
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">TRANSACTION</h4>
+                </li>
                 <li class="nav-item ml-3">
-                    <a href="{{ route('home') }}" target="__blank">
-                        <i class="fas fa-arrow-left"></i>
-                        <p>Website Page</p>
+                    <a href="#">
+                        <i class="fas fa-file-invoice-dollar"></i> {{-- Invoice --}}
+                        <p>Invoice</p>
                     </a>
-                </li> --}}
+                </li>
+
+                {{-- LOGOUT --}}
                 <li class="nav-section">
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
