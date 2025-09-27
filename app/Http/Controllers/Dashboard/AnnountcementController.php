@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\Area;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -13,7 +15,9 @@ class AnnountcementController extends Controller
     public function index()
     {
         $title = 'Master Informasi';
-        return view('pages.dashboard.admin.announcement', compact('title'));
+        $members = User::where('role', 'member')->get();
+        $areas = Area::all();
+        return view('pages.dashboard.admin.announcement', compact('title', 'members', 'areas'));
     }
 
     // HANDLER API
@@ -97,6 +101,9 @@ class AnnountcementController extends Controller
                 $item['is_active'] = $is_active;
                 $item['subject'] = $subject;
                 $item['message'] = $message;
+
+                // tambahkan info target
+                $item['target'] = $item->user ? 'User: ' . $item->user->name . ' - [' . $item->user->username . ']': ($item->area ? 'Area: ' . $item->area->name . ' - [' . $item->area->code . ']' : 'Semua');
                 return $item;
             });
 
@@ -125,7 +132,7 @@ class AnnountcementController extends Controller
     public function getDetail($id)
     {
         try {
-            $announcement = Announcement::find($id);
+            $announcement = Announcement::with(['user:id,name', 'area:id,name,code'])->find($id);
 
             if (!$announcement) {
                 return response()->json(
@@ -161,6 +168,8 @@ class AnnountcementController extends Controller
                 'message' => 'required|string',
                 'type' => 'required|string|in:P,I,S,W,D',
                 'is_active' => 'required|string|in:Y,N',
+                'user_id' => 'nullable|integer|exists:users,id',
+                'area_id' => 'nullable|integer|exists:areas,id',
             ];
 
             $messages = [
@@ -170,6 +179,8 @@ class AnnountcementController extends Controller
                 'type.in' => 'Type informasi tidak sesuai',
                 'is_active.required' => 'Status harus diisi',
                 'is_active.in' => 'Status tidak sesuai',
+                'user_id.exists' => 'User tidak ditemukan',
+                'area_id.exists' => 'Area tidak ditemukan',
             ];
 
             $validator = Validator::make($data, $rules, $messages);
@@ -206,22 +217,27 @@ class AnnountcementController extends Controller
         try {
             $data = $request->all();
             $rules = [
-                'id' => 'required|integer',
+                'id' => 'required|integer|exists:announcements,id',
                 'subject' => 'required|string',
                 'message' => 'required|string',
                 'type' => 'required|string|in:P,I,S,W,D',
                 'is_active' => 'required|string|in:Y,N',
+                'user_id' => 'nullable|integer|exists:users,id',
+                'area_id' => 'nullable|integer|exists:areas,id',
             ];
 
             $messages = [
                 'id.required' => 'Data ID harus diisi',
                 'id.integer' => 'Type ID tidak sesuai',
+                'id.exists' => 'Data tidak ditemukan',
                 'subject.required' => 'Subject harus diisi',
                 'message.required' => 'Message harus diisi',
                 'type.required' => 'Type informasi harus diisi',
                 'type.in' => 'Type informasi tidak sesuai',
                 'is_active.required' => 'Status harus diisi',
                 'is_active.in' => 'Status tidak sesuai',
+                'user_id.exists' => 'User tidak ditemukan',
+                'area_id.exists' => 'Area tidak ditemukan',
             ];
 
             $validator = Validator::make($data, $rules, $messages);
