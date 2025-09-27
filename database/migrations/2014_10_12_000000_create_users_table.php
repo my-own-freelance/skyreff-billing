@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('link_maps')->nullable();
             $table->timestamp('last_login_at')->nullable();
-            $table->boolean('is_active')->default(true);
+            $table->enum('is_active', ['Y', 'N'])->default('Y');
             $table->foreignId('area_id')->nullable()->constrained('areas')->onDelete('set null');
             $table->rememberToken();
             $table->timestamps();
