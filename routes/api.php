@@ -9,6 +9,7 @@ use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\TeknisiController;
+use App\Http\Controllers\Dashboard\TicketController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +119,16 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [AnnountcementController::class, 'update'])->name('announcement.update');
                 Route::post('update-status', [AnnountcementController::class, 'updateStatus'])->name('announcement.change-status');
                 Route::delete('delete', [AnnountcementController::class, 'destroy'])->name('announcement.destroy');
+            });
+
+            // TICKET
+            Route::group(['prefix' => 'ticket'], function () {
+                Route::get('datatable', [TicketController::class, 'dataTable'])->name('ticket.datatable');
+                Route::get('{id}/detail', [TicketController::class, 'getDetail'])->name('ticket.detail');
+                Route::post('create', [TicketController::class, 'create'])->name('ticket.create');
+                Route::post('update', [TicketController::class, 'update'])->name('ticket.update');
+                Route::post('update-status', [TicketController::class, 'updateStatus'])->name('ticket.change-status');
+                Route::delete('delete', [TicketController::class, 'destroy'])->name('ticket.destroy');
             });
         });
     });

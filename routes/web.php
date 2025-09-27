@@ -10,6 +10,7 @@ use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\TeknisiController;
+use App\Http\Controllers\Dashboard\TicketController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,7 @@ Route::group(['middleware' => 'auth:web'], function () {
         // PREFIX MANAGE
         Route::group(['prefix' => 'manage'], function () {
             Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
+            Route::get('/ticket', [TicketController::class, 'index'])->name('ticket');
         });
     });
     // ADMIN AND TEKNISI ACCESS

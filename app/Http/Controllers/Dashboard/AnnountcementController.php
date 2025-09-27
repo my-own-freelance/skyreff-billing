@@ -19,20 +19,21 @@ class AnnountcementController extends Controller
     // HANDLER API
     public function dataTable(Request $request)
     {
-        $query = Announcement::query();
+        try {
+            $query = Announcement::query();
 
-        if ($request->query('search')) {
-            $searchValue = $request->query('search')['value'];
-            $query->where(function ($query) use ($searchValue) {
-                $query->where('subject', 'like', '%' . $searchValue . '%')->Orwhere('message', 'like', '%' . $searchValue . '%');
-            });
-        }
+            if ($request->query('search')) {
+                $searchValue = $request->query('search')['value'];
+                $query->where(function ($query) use ($searchValue) {
+                    $query->where('subject', 'like', '%' . $searchValue . '%')->Orwhere('message', 'like', '%' . $searchValue . '%');
+                });
+            }
 
-        $recordsFiltered = $query->count();
-        $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
+            $recordsFiltered = $query->count();
+            $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
 
-        $output = $data->map(function ($item) {
-            $action = " <div class='dropdown-primary dropdown open'>
+            $output = $data->map(function ($item) {
+                $action = " <div class='dropdown-primary dropdown open'>
                             <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' id='dropdown-{$item->id}' data-toggle='dropdown' aria-haspopup='true' aria-expanded='true'>
                                 Aksi
                             </button>
@@ -42,70 +43,83 @@ class AnnountcementController extends Controller
                             </div>
                         </div>";
 
-            $is_active =
-                $item->is_active == 'Y'
-                    ? '
+                $is_active =
+                    $item->is_active == 'Y'
+                        ? '
                 <div class="text-center">
                     <span class="label-switch">Publish</span>
                 </div>
                 <div class="input-row">
                     <div class="toggle_status on">
                         <input type="checkbox" onclick="return updateStatus(\'' .
-                        $item->id .
-                        '\', \'Draft\');" />
+                            $item->id .
+                            '\', \'Draft\');" />
                         <span class="slider"></span>
                     </div>
                 </div>'
-                    : '<div class="text-center">
+                        : '<div class="text-center">
                     <span class="label-switch">Draft</span>
                 </div>
                 <div class="input-row">
                     <div class="toggle_status off">
                         <input type="checkbox" onclick="return updateStatus(\'' .
-                        $item->id .
-                        '\', \'Publish\');" />
+                            $item->id .
+                            '\', \'Publish\');" />
                         <span class="slider"></span>
                     </div>
                 </div>';
 
-            $subject = '<p>' . Str::limit(strip_tags($item->subject), 100) . '</p>';
-            $message = '<p>' . Str::limit(strip_tags($item->message), 150) . '</p>';
-            $type = '';
-            switch ($item->type) {
-                case 'P':
-                    $type = "<span class='badge badge-primary'>Primary</span>";
-                    break;
-                case 'I':
-                    $type = "<span class='badge badge-info'>Announcement</span>";
-                    break;
-                case 'S':
-                    $type = "<span class='badge badge-success'>Success</span>";
-                    break;
-                case 'W':
-                    $type = "<span class='badge badge-warning'>Warning</span>";
-                    break;
-                case 'D':
-                    $type = "<span class='badge badge-danger'>Danger</span>";
-                    break;
-                default:
-                    $type = "<span class='badge badge-info'>Announcement</span>";
-                    break;
-            }
-            $item['type'] = $type;
-            $item['action'] = $action;
-            $item['is_active'] = $is_active;
-            $item['subject'] = $subject;
-            $item['message'] = $message;
-            return $item;
-        });
+                $subject = '<p>' . Str::limit(strip_tags($item->subject), 100) . '</p>';
+                $message = '<p>' . Str::limit(strip_tags($item->message), 150) . '</p>';
+                $type = '';
+                switch ($item->type) {
+                    case 'P':
+                        $type = "<span class='badge badge-primary'>Primary</span>";
+                        break;
+                    case 'I':
+                        $type = "<span class='badge badge-info'>Announcement</span>";
+                        break;
+                    case 'S':
+                        $type = "<span class='badge badge-success'>Success</span>";
+                        break;
+                    case 'W':
+                        $type = "<span class='badge badge-warning'>Warning</span>";
+                        break;
+                    case 'D':
+                        $type = "<span class='badge badge-danger'>Danger</span>";
+                        break;
+                    default:
+                        $type = "<span class='badge badge-info'>Announcement</span>";
+                        break;
+                }
+                $item['type'] = $type;
+                $item['action'] = $action;
+                $item['is_active'] = $is_active;
+                $item['subject'] = $subject;
+                $item['message'] = $message;
+                return $item;
+            });
 
-        $total = Announcement::count();
-        return response()->json([
-            'draw' => $request->query('draw'),
-            'recordsFiltered' => $recordsFiltered,
-            'recordsTotal' => $total,
-            'data' => $output,
-        ]);
+            $total = Announcement::count();
+            return response()->json([
+                'draw' => $request->query('draw'),
+                'recordsFiltered' => $recordsFiltered,
+                'recordsTotal' => $total,
+                'data' => $output,
+            ]);
+        } catch (\Throwable $err) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => $err->getMessage(),
+                    'draw' => $request->query('draw'),
+                    'recordsFiltered' => 0,
+                    'recordsTotal' => 0,
+                    'data' => [],
+                ],
+                500,
+            );
+        }
     }
 
     public function getDetail($id)

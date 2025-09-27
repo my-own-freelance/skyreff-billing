@@ -20,20 +20,21 @@ class PlanController extends Controller
     // HANDLER API
     public function dataTable(Request $request)
     {
-        $query = Plan::query();
+        try {
+            $query = Plan::query();
 
-        if ($request->query('search')) {
-            $searchValue = $request->query('search')['value'];
-            $query->where(function ($query) use ($searchValue) {
-                $query->where('name', 'like', '%' . $searchValue . '%')->orWhere('description', 'like', '%' . $searchValue . '%');
-            });
-        }
+            if ($request->query('search')) {
+                $searchValue = $request->query('search')['value'];
+                $query->where(function ($query) use ($searchValue) {
+                    $query->where('name', 'like', '%' . $searchValue . '%')->orWhere('description', 'like', '%' . $searchValue . '%');
+                });
+            }
 
-        $recordsFiltered = $query->count();
-        $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
+            $recordsFiltered = $query->count();
+            $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
 
-        $output = $data->map(function ($item) {
-            $action = " <div class='dropdown-primary dropdown open'>
+            $output = $data->map(function ($item) {
+                $action = " <div class='dropdown-primary dropdown open'>
                             <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' id='dropdown-{$item->id}' data-toggle='dropdown' aria-haspopup='true' aria-expanded='true'>
                                 Aksi
                             </button>
@@ -43,65 +44,78 @@ class PlanController extends Controller
                             </div>
                         </div>";
 
-            $is_active =
-                $item->is_active == 'Y'
-                    ? '
+                $is_active =
+                    $item->is_active == 'Y'
+                        ? '
                 <div class="text-center">
                     <span class="label-switch">Publish</span>
                 </div>
                 <div class="input-row">
                     <div class="toggle_status on">
                         <input type="checkbox" onclick="return updateStatus(\'' .
-                        $item->id .
-                        '\', \'Draft\');" />
+                            $item->id .
+                            '\', \'Draft\');" />
                         <span class="slider"></span>
                     </div>
                 </div>'
-                    : '<div class="text-center">
+                        : '<div class="text-center">
                     <span class="label-switch">Draft</span>
                 </div>
                 <div class="input-row">
                     <div class="toggle_status off">
                         <input type="checkbox" onclick="return updateStatus(\'' .
-                        $item->id .
-                        '\', \'Publish\');" />
+                            $item->id .
+                            '\', \'Publish\');" />
                         <span class="slider"></span>
                     </div>
                 </div>';
 
-            $image = $item->image
-                ? '<div class="thumbnail">
+                $image = $item->image
+                    ? '<div class="thumbnail">
                         <div class="thumb">
                             <img src="' .
-                    Storage::url($item->image) .
-                    '" alt="" width="250px" height="250px"
+                        Storage::url($item->image) .
+                        '" alt="" width="250px" height="250px"
                             class="img-fluid img-thumbnail" alt="' .
-                    $item->name .
-                    '">
+                        $item->name .
+                        '">
                         </div>
                     </div>'
-                : '-';
+                    : '-';
 
-            $name = '<p>' . Str::limit(strip_tags($item->name), 100) . '</p>';
-            $description = '<p>' . Str::limit(strip_tags($item->description), 150) . '</p>';
-            $price = number_format($item->price, 0, ',', '.');
+                $name = '<p>' . Str::limit(strip_tags($item->name), 100) . '</p>';
+                $description = '<p>' . Str::limit(strip_tags($item->description), 150) . '</p>';
+                $price = number_format($item->price, 0, ',', '.');
 
-            $item['action'] = $action;
-            $item['is_active'] = $is_active;
-            $item['image'] = $image;
-            $item['name'] = $name;
-            $item['description'] = $description;
-            $item['price'] = 'Rp ' . $price;
-            return $item;
-        });
+                $item['action'] = $action;
+                $item['is_active'] = $is_active;
+                $item['image'] = $image;
+                $item['name'] = $name;
+                $item['description'] = $description;
+                $item['price'] = 'Rp ' . $price;
+                return $item;
+            });
 
-        $total = Plan::count();
-        return response()->json([
-            'draw' => $request->query('draw'),
-            'recordsFiltered' => $recordsFiltered,
-            'recordsTotal' => $total,
-            'data' => $output,
-        ]);
+            $total = Plan::count();
+            return response()->json([
+                'draw' => $request->query('draw'),
+                'recordsFiltered' => $recordsFiltered,
+                'recordsTotal' => $total,
+                'data' => $output,
+            ]);
+        } catch (\Throwable $err) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => $err->getMessage(),
+                    'draw' => $request->query('draw'),
+                    'recordsFiltered' => 0,
+                    'recordsTotal' => 0,
+                    'data' => [],
+                ],
+                500,
+            );
+        }
     }
 
     public function getDetail($id)

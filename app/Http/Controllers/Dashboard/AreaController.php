@@ -19,22 +19,23 @@ class AreaController extends Controller
     // HANDLER API
     public function dataTable(Request $request)
     {
-        $query = Area::query();
+        try {
+            $query = Area::query();
 
-        if ($request->query('search')) {
-            $searchValue = $request->query('search')['value'];
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('name', 'like', '%' . $searchValue . '%')
-                    ->orWhere('code', 'like', '%' . $searchValue . '%')
-                    ->orWhere('description', 'like', '%' . $searchValue . '%');
-            });
-        }
+            if ($request->query('search')) {
+                $searchValue = $request->query('search')['value'];
+                $query->where(function ($q) use ($searchValue) {
+                    $q->where('name', 'like', '%' . $searchValue . '%')
+                        ->orWhere('code', 'like', '%' . $searchValue . '%')
+                        ->orWhere('description', 'like', '%' . $searchValue . '%');
+                });
+            }
 
-        $recordsFiltered = $query->count();
-        $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
+            $recordsFiltered = $query->count();
+            $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
 
-        $output = $data->map(function ($item) {
-            $action = " <div class='dropdown-primary dropdown open'>
+            $output = $data->map(function ($item) {
+                $action = " <div class='dropdown-primary dropdown open'>
                             <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' id='dropdown-{$item->id}' data-toggle='dropdown' aria-haspopup='true' aria-expanded='true'>
                                 Aksi
                             </button>
@@ -44,22 +45,35 @@ class AreaController extends Controller
                             </div>
                         </div>";
 
-            $item['name'] = '<p>' . e($item->name) . '</p>';
-            $item['code'] = '<p>' . e($item->code ?? '-') . '</p>';
-            $item['description'] = '<p>' . Str::limit(strip_tags($item->description), 100) . '</p>';
-            $item['meta'] = '<p>' . e($item->meta ? json_encode($item->meta) : '-') . '</p>';
-            $item['action'] = $action;
+                $item['name'] = '<p>' . e($item->name) . '</p>';
+                $item['code'] = '<p>' . e($item->code ?? '-') . '</p>';
+                $item['description'] = '<p>' . Str::limit(strip_tags($item->description), 100) . '</p>';
+                $item['meta'] = '<p>' . e($item->meta ? json_encode($item->meta) : '-') . '</p>';
+                $item['action'] = $action;
 
-            return $item;
-        });
+                return $item;
+            });
 
-        $total = Area::count();
-        return response()->json([
-            'draw' => $request->query('draw'),
-            'recordsFiltered' => $recordsFiltered,
-            'recordsTotal' => $total,
-            'data' => $output,
-        ]);
+            $total = Area::count();
+            return response()->json([
+                'draw' => $request->query('draw'),
+                'recordsFiltered' => $recordsFiltered,
+                'recordsTotal' => $total,
+                'data' => $output,
+            ]);
+        } catch (\Throwable $err) {
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => $err->getMessage(),
+                    'draw' => $request->query('draw'),
+                    'recordsFiltered' => 0,
+                    'recordsTotal' => 0,
+                    'data' => [],
+                ],
+                500,
+            );
+        }
     }
 
     public function getDetail($id)

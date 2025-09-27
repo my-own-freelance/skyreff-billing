@@ -83,8 +83,8 @@
                         <p>Subscription</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'ticket' ? 'active' : '' }}">
+                    <a href="{{ route('ticket') }}">
                         <i class="fas fa-ticket-alt"></i> {{-- Ticket --}}
                         <p>Ticket</p>
                     </a>
