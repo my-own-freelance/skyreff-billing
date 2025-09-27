@@ -9,7 +9,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <h5 class="text-uppercase title">DATA OWNER</h5>
+                        <h5 class="text-uppercase title">DATA MEMBER</h5>
                     </div>
                     <div class="card-header-right">
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
@@ -18,19 +18,23 @@
                 </div>
                 <div class="card-block">
                     <div class="table-responsive mt-3">
-                        <table class="table table-striped table-bordered nowrap dataTable" id="ownerDataTable">
+                        <table class="table table-striped table-bordered nowrap dataTable" id="memberDataTable">
                             <thead>
                                 <tr>
                                     <th class="all">#</th>
                                     <th class="all">Nama</th>
                                     <th class="all">Username</th>
                                     <th class="all">Phone</th>
+                                    <th class="all">Area</th>
+                                    <th class="all">Alamat</th>
+                                    <th class="all">Link Maps</th>
+                                    <th class="all">Last Login</th>
                                     <th class="all">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan="9" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -38,11 +42,13 @@
                 </div>
             </div>
         </div>
+
+        {{-- FORM TAMBAH/EDIT --}}
         <div class="col-md-4 col-sm-12" style="display: none" data-action="update" id="formEditable">
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <h5>Tambah / Edit</h5>
+                        <h5>Tambah / Edit Member</h5>
                     </div>
                     <div class="card-header-right">
                         <button class="btn btn-sm btn-warning" onclick="return closeForm(this)" id="btnCloseForm">
@@ -56,28 +62,46 @@
                         <div class="form-group">
                             <label for="name">Nama</label>
                             <input class="form-control" id="name" type="text" name="name"
-                                placeholder="masukkan nama owner" required />
+                                placeholder="masukkan nama member" required />
                         </div>
                         <div class="form-group">
                             <label for="username">Username</label>
                             <input class="form-control" id="username" type="text" name="username"
-                                placeholder="masukkan username owner" required />
+                                placeholder="masukkan username member" required />
                         </div>
                         <div class="form-group">
                             <label for="phone">Nomor Telpon</label>
                             <input class="form-control" id="phone" type="text" name="phone"
-                                placeholder="masukkan nomor telpon owner" required />
+                                placeholder="masukkan nomor telpon member" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="area_id">Area</label>
+                            <select class="form-control" id="area_id" name="area_id" required>
+                                <option value="">Pilih Area</option>
+                                @foreach ($areas as $area)
+                                    <option value="{{ $area->id }}">{{ $area->name }} - [{{ $area->code }}]</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Alamat</label>
+                            <textarea class="form-control" id="address" name="address" placeholder="masukkan alamat member"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="link_maps">Link Maps</label>
+                            <input class="form-control" id="link_maps" type="url" name="link_maps"
+                                placeholder="masukkan link maps" />
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
                             <input class="form-control" id="password" type="password" name="password"
-                                placeholder="masukkan password owner" />
+                                placeholder="masukkan password member" />
                             <small class="text-warning">Min 5 Karakter</small>
                         </div>
                         <div class="form-group">
                             <label for="is_active">Status</label>
-                            <select class="form-control form-control" id="is_active" name="is_active" required>
-                                <option value = "">Pilih Status</option>
+                            <select class="form-control" id="is_active" name="is_active" required>
+                                <option value="">Pilih Status</option>
                                 <option value="Y">Aktif</option>
                                 <option value="N">Disable</option>
                             </select>
@@ -96,6 +120,7 @@
         </div>
     </div>
 @endsection
+
 @push('scripts')
     <script src="{{ asset('/dashboard/js/plugin/datatables/datatables.min.js') }}"></script>
     <script>
@@ -106,10 +131,10 @@
         })
 
         function dataTable() {
-            const url = "{{ route('owner.datatable') }}";
-            dTable = $("#ownerDataTable").DataTable({
+            const url = "{{ route('member.datatable') }}";
+            dTable = $("#memberDataTable").DataTable({
                 searching: true,
-                orderng: true,
+                ordering: true,
                 lengthChange: true,
                 responsive: true,
                 processing: true,
@@ -119,16 +144,39 @@
                 lengthMenu: [5, 10, 25, 50, 100],
                 ajax: url,
                 columns: [{
-                    data: "action"
-                }, {
-                    data: "name"
-                }, {
-                    data: "username"
-                }, {
-                    data: "phone"
-                }, {
-                    data: "is_active"
-                }],
+                        data: "action"
+                    },
+                    {
+                        data: "name"
+                    },
+                    {
+                        data: "username"
+                    },
+                    {
+                        data: "phone"
+                    },
+                    {
+                        data: "area.name",
+                        defaultContent: "-"
+                    },
+                    {
+                        data: "address",
+                        defaultContent: "-"
+                    },
+                    {
+                        data: "link_maps",
+                        render: function(data) {
+                            return data ? `<a href="${data}" class="text-primary" target="_blank">Lihat Maps</a>` : "-";
+                        }
+                    },
+                    {
+                        data: "last_login_at_formatted",
+                        defaultContent: "-"
+                    },
+                    {
+                        data: "is_active"
+                    }
+                ],
                 pageLength: 25,
             });
         }
@@ -136,7 +184,6 @@
         function refreshData() {
             dTable.ajax.reload(null, false);
         }
-
 
         function addData() {
             $("#username").removeAttr("readonly");
@@ -155,7 +202,7 @@
 
         function getData(id) {
             $.ajax({
-                url: "{{ route('owner.detail', ['id' => ':id']) }}".replace(':id', id),
+                url: "{{ route('member.detail', ['id' => ':id']) }}".replace(':id', id),
                 method: "GET",
                 dataType: "json",
                 success: function(res) {
@@ -164,15 +211,16 @@
                         let d = res.data;
                         $("#id").val(d.id);
                         $("#name").val(d.name);
-                        $("#username").val(d.username);
-                        $("#username").attr("readonly", true);
+                        $("#username").val(d.username).attr("readonly", true);
                         $("#phone").val(d.phone);
-                        $("#password").val(d.password);
-                        $("#is_active").val(d.is_active).change()
+                        $("#area_id").val(d.area_id).change();
+                        $("#address").val(d.address);
+                        $("#link_maps").val(d.link_maps);
+                        $("#password").val("");
+                        $("#is_active").val(d.is_active).change();
                     })
                 },
                 error: function(err) {
-                    console.log("error :", err);
                     showMessage("warning", "flaticon-error", "Peringatan", err.message || err.responseJSON
                         ?.message);
                 }
@@ -186,6 +234,9 @@
             formData.append("name", $("#name").val());
             formData.append("username", $("#username").val());
             formData.append("phone", $("#phone").val());
+            formData.append("area_id", $("#area_id").val());
+            formData.append("address", $("#address").val());
+            formData.append("link_maps", $("#link_maps").val());
             formData.append("password", $("#password").val());
             formData.append("is_active", $("#is_active").val());
 
@@ -205,13 +256,12 @@
 
         function saveData(data, action) {
             $.ajax({
-                url: action == "update" ? "{{ route('owner.update') }}" : "{{ route('owner.create') }}",
+                url: action == "update" ? "{{ route('member.update') }}" : "{{ route('member.create') }}",
                 contentType: false,
                 processData: false,
                 method: "POST",
                 data: data,
                 beforeSend: function() {
-                    console.log("Loading...")
                     $("#submit").attr("disabled", true)
                 },
                 success: function(res) {
@@ -222,7 +272,6 @@
                 },
                 error: function(err) {
                     $("#submit").attr("disabled", false)
-                    console.log("error :", err);
                     showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
                         ?.message);
                 }
@@ -233,20 +282,16 @@
             let c = confirm("Apakah anda yakin untuk menghapus data ini ?");
             if (c) {
                 $.ajax({
-                    url: "{{ route('owner.destroy') }}",
+                    url: "{{ route('member.destroy') }}",
                     method: "DELETE",
                     data: {
                         id: id
-                    },
-                    beforeSend: function() {
-                        console.log("Loading...")
                     },
                     success: function(res) {
                         refreshData();
                         showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
                     },
                     error: function(err) {
-                        console.log("error :", err);
                         showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
                             ?.message);
                     }
@@ -256,20 +301,16 @@
 
         function updateStatusData(data) {
             $.ajax({
-                url: "{{ route('owner.change-status') }}",
+                url: "{{ route('member.change-status') }}",
                 contentType: false,
                 processData: false,
                 method: "POST",
                 data: data,
-                beforeSend: function() {
-                    console.log("Loading...")
-                },
                 success: function(res) {
                     showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
                     refreshData();
                 },
                 error: function(err) {
-                    console.log("error :", err);
                     showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
                         ?.message);
                 }

@@ -45,8 +45,8 @@
                         <p>Teknisi</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3  {{ $routename == 'member' ? 'active' : '' }}">
+                    <a href="{{ route('member') }}">
                         <i class="fas fa-users"></i> {{-- Member --}}
                         <p>Member</p>
                     </a>

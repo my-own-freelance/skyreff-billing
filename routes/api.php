@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
+use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\WebConfigController;
@@ -50,7 +51,7 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('create', [OwnerController::class, 'create'])->name('owner.create');
                 Route::post('update', [OwnerController::class, 'update'])->name('owner.update');
                 Route::post('update-status', [OwnerController::class, 'updateStatus'])->name('owner.change-status');
-                Route::post('delete', [OwnerController::class, 'destroy'])->name('owner.destroy');
+                Route::delete('delete', [OwnerController::class, 'destroy'])->name('owner.destroy');
             });
 
             // TEKNISI
@@ -60,7 +61,17 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('create', [TeknisiController::class, 'create'])->name('teknisi.create');
                 Route::post('update', [TeknisiController::class, 'update'])->name('teknisi.update');
                 Route::post('update-status', [TeknisiController::class, 'updateStatus'])->name('teknisi.change-status');
-                Route::post('delete', [TeknisiController::class, 'destroy'])->name('teknisi.destroy');
+                Route::delete('delete', [TeknisiController::class, 'destroy'])->name('teknisi.destroy');
+            });
+
+            // MEMBER
+            Route::group(['prefix' => 'member'], function () {
+                Route::get('datatable', [MemberController::class, 'dataTable'])->name('member.datatable');
+                Route::get('{id}/detail', [MemberController::class, 'getDetail'])->name('member.detail');
+                Route::post('create', [MemberController::class, 'create'])->name('member.create');
+                Route::post('update', [MemberController::class, 'update'])->name('member.update');
+                Route::post('update-status', [MemberController::class, 'updateStatus'])->name('member.change-status');
+                Route::delete('delete', [MemberController::class, 'destroy'])->name('member.destroy');
             });
         });
 

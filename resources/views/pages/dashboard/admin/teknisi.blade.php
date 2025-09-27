@@ -234,7 +234,7 @@
             if (c) {
                 $.ajax({
                     url: "{{ route('teknisi.destroy') }}",
-                    method: "POST",
+                    method: "DELETE",
                     data: {
                         id: id
                     },
