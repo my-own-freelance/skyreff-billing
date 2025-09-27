@@ -13,20 +13,28 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Table name (optional, defaultnya "users")
+     */
+    protected $table = 'users';
+
+    /**
+     * Kolom yang boleh diisi mass assignment
      */
     protected $fillable = [
         'name',
-        'email',
+        'username',
         'password',
+        'role',
+        'phone',
+        'address',
+        'link_maps',
+        'last_login_at',
+        'is_active',
+        'area_id',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Kolom yang harus disembunyikan saat serialisasi
      */
     protected $hidden = [
         'password',
@@ -34,12 +42,47 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * Casting atribut
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'last_login_at' => 'datetime',
+        'is_active'     => 'boolean',
+        'password'      => 'hashed', // Laravel 10 fitur baru hashing otomatis
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
+    // Relasi ke Area
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'area_id');
+    }
+
+    // Relasi ke subscription
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'user_id');
+    }
+
+    // Relasi ke tiket (jika user role member bikin tiket)
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'member_id');
+    }
+
+    // Relasi ke tiket (jika user role teknisi mengerjakan tiket)
+    public function assignedTickets()
+    {
+        return $this->hasMany(Ticket::class, 'technician_id');
+    }
+
+    // Relasi ke invoice
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'user_id');
+    }
 }
