@@ -27,10 +27,10 @@
                     </span>
                     <h4 class="text-section">MASTER</h4>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'user-access' ? 'active' : '' }}">
-                    <a href="#">
-                        <i class="fas fa-user-shield"></i> {{-- User Akses --}}
-                        <p>User Akses</p>
+                <li class="nav-item ml-3 {{ $routename == 'owner' ? 'active' : '' }}">
+                    <a href="{{ route('owner') }}">
+                        <i class="fas fa-user-tie"></i>
+                        <p>Owner</p>
                     </a>
                 </li>
                 <li class="nav-item ml-3">
@@ -59,7 +59,7 @@
                 </li>
 
                 {{-- MANAGE --}}
-                <li class="nav-section">
+                <li class="nav-section">    
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
                     </span>

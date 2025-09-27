@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,7 @@ Route::group(['middleware' => 'auth:web'], function () {
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'web.check.role:admin'], function () {
         Route::get('/web-config', [WebConfigController::class, 'index'])->name('web-config');
+        Route::get("/owner", [OwnerController::class, "index"])->name("owner");
     });
     // ADMIN AND TEKNISI ACCESS
 

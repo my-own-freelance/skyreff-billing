@@ -46,7 +46,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'last_login_at' => 'datetime',
-        'is_active'     => 'boolean',
         'password'      => 'hashed', // Laravel 10 fitur baru hashing otomatis
     ];
 
