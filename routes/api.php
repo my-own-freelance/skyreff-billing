@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\OwnerController;
@@ -32,6 +33,16 @@ Route::group(['middleware' => 'check.auth'], function () {
 
         // PREFIX MASTER
         Route::group(['prefix' => 'master'], function () {
+            // AREA
+            Route::group(['prefix' => 'area'], function () {
+                Route::get('datatable', [\App\Http\Controllers\Dashboard\AreaController::class, 'dataTable'])->name('area.datatable');
+                Route::get('{id}/detail', [AreaController::class, 'getDetail'])->name('area.detail');
+                Route::post('create', [AreaController::class, 'create'])->name('area.create');
+                Route::post('update', [AreaController::class, 'update'])->name('area.update');
+                Route::post('update-status', [AreaController::class, 'updateStatus'])->name('area.change-status');
+                Route::delete('delete', [AreaController::class, 'destroy'])->name('area.destroy');
+            });
+
             // OWNER
             Route::group(['prefix' => 'owner'], function () {
                 Route::get('datatable', [OwnerController::class, 'dataTable'])->name('owner.datatable');

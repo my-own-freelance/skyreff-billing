@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\DashboardController;
@@ -41,6 +42,7 @@ Route::group(['middleware' => 'auth:web'], function () {
 
         // PREFIX MASTER
         Route::group(['prefix' => 'master'], function () {
+            Route::get('/area', [AreaController::class, 'index'])->name('area');
             Route::get('/owner', [OwnerController::class, 'index'])->name('owner');
             Route::get('/teknisi', [TeknisiController::class, 'index'])->name('teknisi');
         });

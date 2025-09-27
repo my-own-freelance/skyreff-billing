@@ -27,6 +27,12 @@
                     </span>
                     <h4 class="text-section">MASTER</h4>
                 </li>
+                <li class="nav-item ml-3 {{ $routename == 'area' ? 'active' : '' }}">
+                    <a href="{{ route('area') }}">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Area</p>
+                    </a>
+                </li>
                 <li class="nav-item ml-3 {{ $routename == 'owner' ? 'active' : '' }}">
                     <a href="{{ route('owner') }}">
                         <i class="fas fa-user-tie"></i>
