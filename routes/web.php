@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DeviceController;
+use App\Http\Controllers\Dashboard\DeviceFaqController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\TeknisiController;
@@ -49,7 +50,7 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/teknisi', [TeknisiController::class, 'index'])->name('teknisi');
             Route::get('/member', [MemberController::class, 'index'])->name('member');
             Route::get("/device", action: [DeviceController::class, 'index'])->name('device');
-
+            Route::get("/faq", action: [DeviceFaqController::class, 'index'])->name('faq');
         });
 
         // PREFIX MANAGE

@@ -57,6 +57,12 @@
                         <p>Device</p>
                     </a>
                 </li>
+                <li class="nav-item ml-3 {{ $routename == 'device-faq' ? 'active' : '' }}">
+                    <a href="{{ route('faq') }}">
+                        <i class="fas fa-question-circle"></i> {{-- Device FAQ --}}
+                        <p>Device FAQ</p>
+                    </a>
+                </li>
                 <li class="nav-item ml-3">
                     <a href="#">
                         <i class="fas fa-box-open"></i> {{-- Paket Plan --}}

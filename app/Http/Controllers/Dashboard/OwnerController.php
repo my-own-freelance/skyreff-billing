@@ -152,7 +152,7 @@ class OwnerController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Berhasil update data admin',
+                'message' => 'Berhasil tambah data admin',
             ]);
         } catch (\Exception $err) {
             return response()->json(
