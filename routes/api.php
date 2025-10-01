@@ -13,6 +13,7 @@ use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\SubscriptionController;
 use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\TicketController;
+use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,9 @@ Route::group(['middleware' => 'guest'], function () {
 });
 
 Route::group(['middleware' => 'check.auth'], function () {
+    Route::get("/account/detail", [UserController::class, "getDetailAccount"])->name("user.detail-account");
+    Route::post("/account/update", [UserController::class, "updateAccountReseller"])->name("user.update-account");
+
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'api.check.role:admin'], function () {
         Route::get("/statistic-chart", [DashboardController::class, "getStatisticChart"])->name("statistic-chart");

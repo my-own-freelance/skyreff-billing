@@ -55,27 +55,27 @@ class TeknisiController extends Controller
 
                 $is_active =
                     $item->is_active == 'Y'
-                        ? '
+                    ? '
                     <div class="text-center">
                         <span class="label-switch">Active</span>
                     </div>
                     <div class="input-row">
                         <div class="toggle_status on">
                             <input type="checkbox" onclick="return updateStatus(\'' .
-                            $item->id .
-                            '\', \'Disabled\');" />
+                    $item->id .
+                    '\', \'Disabled\');" />
                             <span class="slider"></span>
                         </div>
                     </div>'
-                        : '
+                    : '
                     <div class="text-center">
                         <span class="label-switch">Disabled</span>
                     </div>
                     <div class="input-row">
                         <div class="toggle_status off">
                             <input type="checkbox" onclick="return updateStatus(\'' .
-                            $item->id .
-                            '\', \'Active\');" />
+                    $item->id .
+                    '\', \'Active\');" />
                             <span class="slider"></span>
                         </div>
                     </div>';

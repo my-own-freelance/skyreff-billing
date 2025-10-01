@@ -19,11 +19,11 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-section">
-                    <span class="sidebar-mini-icon">
-                        <i class="fa fa-ellipsis-h"></i>
-                    </span>
-                    <h4 class="text-section">Master</h4>
+                <li class="nav-item ml-3">
+                    <a href="{{ route('user.account') }}">
+                        <i class="fas fa-user-cog"></i>
+                        <p>Setting Account</p>
+                    </a>
                 </li>
                 {{-- <li class="nav-item ml-3 {{ $routename == 'akrab' ? 'active' : '' }}">
                     <a href="{{ route('akrab') }}">

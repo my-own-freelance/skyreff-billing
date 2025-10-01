@@ -19,6 +19,12 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
+                <li class="nav-item ml-3">
+                    <a href="{{ route('user.account') }}">
+                        <i class="fas fa-user-cog"></i>
+                        <p>Setting Account</p>
+                    </a>
+                </li>
                 {{-- <li class="nav-section">
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>

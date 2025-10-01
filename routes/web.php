@@ -13,6 +13,7 @@ use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\SubscriptionController;
 use App\Http\Controllers\Dashboard\TeknisiController;
 use App\Http\Controllers\Dashboard\TicketController;
+use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\WebConfigController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,7 @@ Route::group(['middleware' => 'auth:web'], function () {
     Route::get('/admin', [DashboardController::class, 'index'])->name('dashboard.admin');
     Route::get('/teknisi', [DashboardController::class, 'index'])->name('dashboard.teknisi');
     Route::get('/member', [DashboardController::class, 'index'])->name('dashboard.member');
+    Route::get("/account", [UserController::class, "account"])->name("user.account");
 
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'web.check.role:admin'], function () {
