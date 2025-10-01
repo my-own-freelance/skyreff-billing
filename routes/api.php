@@ -86,26 +86,6 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::delete('delete', [MemberController::class, 'destroy'])->name('member.destroy');
             });
 
-            // DEVICE
-            Route::group(['prefix' => 'device'], function () {
-                Route::get('datatable', [DeviceController::class, 'dataTable'])->name('device.datatable');
-                Route::get('{id}/detail', [DeviceController::class, 'getDetail'])->name('device.detail');
-                Route::post('create', [DeviceController::class, 'create'])->name('device.create');
-                Route::post('update', [DeviceController::class, 'update'])->name('device.update');
-                Route::post('update-status', [DeviceController::class, 'updateStatus'])->name('device.change-status');
-                Route::delete('delete', [DeviceController::class, 'destroy'])->name('device.destroy');
-            });
-
-            // DEVICE-FAQ
-            Route::group(['prefix' => 'faq'], function () {
-                Route::get('datatable', [DeviceFaqController::class, 'dataTable'])->name('faq.datatable');
-                Route::get('{id}/detail', [DeviceFaqController::class, 'getDetail'])->name('faq.detail');
-                Route::post('create', [DeviceFaqController::class, 'create'])->name('faq.create');
-                Route::post('update', [DeviceFaqController::class, 'update'])->name('faq.update');
-                Route::post('update-status', [DeviceFaqController::class, 'updateStatus'])->name('faq.change-status');
-                Route::delete('delete', [DeviceFaqController::class, 'destroy'])->name('faq.destroy');
-            });
-
             // PLAN
             Route::group(['prefix' => 'plan'], function () {
                 Route::get('datatable', [PlanController::class, 'dataTable'])->name('plan.datatable');
@@ -150,6 +130,33 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [TicketController::class, 'update'])->name('ticket.update');
                 Route::post('update-status', [TicketController::class, 'updateStatus'])->name('ticket.change-status');
                 Route::delete('delete', [TicketController::class, 'destroy'])->name('ticket.destroy');
+            });
+        });
+    });
+
+    // ADMIN AND TEKNISI
+    Route::group(['middleware' => 'api.check.role:admin,teknisi'], function () {
+
+        // MASTER
+        Route::group(['prefix' => 'master'], function () {
+            // DEVICE
+            Route::group(['prefix' => 'device'], function () {
+                Route::get('datatable', [DeviceController::class, 'dataTable'])->name('device.datatable');
+                Route::get('{id}/detail', [DeviceController::class, 'getDetail'])->name('device.detail');
+                Route::post('create', [DeviceController::class, 'create'])->name('device.create');
+                Route::post('update', [DeviceController::class, 'update'])->name('device.update');
+                Route::post('update-status', [DeviceController::class, 'updateStatus'])->name('device.change-status');
+                Route::delete('delete', [DeviceController::class, 'destroy'])->name('device.destroy');
+            });
+
+            // DEVICE-FAQ
+            Route::group(['prefix' => 'faq'], function () {
+                Route::get('datatable', [DeviceFaqController::class, 'dataTable'])->name('faq.datatable');
+                Route::get('{id}/detail', [DeviceFaqController::class, 'getDetail'])->name('faq.detail');
+                Route::post('create', [DeviceFaqController::class, 'create'])->name('faq.create');
+                Route::post('update', [DeviceFaqController::class, 'update'])->name('faq.update');
+                Route::post('update-status', [DeviceFaqController::class, 'updateStatus'])->name('faq.change-status');
+                Route::delete('delete', [DeviceFaqController::class, 'destroy'])->name('faq.destroy');
             });
         });
     });

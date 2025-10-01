@@ -55,8 +55,6 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/owner', [OwnerController::class, 'index'])->name('owner');
             Route::get('/teknisi', [TeknisiController::class, 'index'])->name('teknisi');
             Route::get('/member', [MemberController::class, 'index'])->name('member');
-            Route::get('/device', action: [DeviceController::class, 'index'])->name('device');
-            Route::get('/faq', action: [DeviceFaqController::class, 'index'])->name('faq');
             Route::get('/plan', action: [PlanController::class, 'index'])->name('plan');
         });
 
@@ -67,7 +65,14 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/ticket', [TicketController::class, 'index'])->name('ticket');
         });
     });
-    // ADMIN AND TEKNISI ACCESS
+    // ADMIN AND TEKNISI
+    Route::group(['middleware' => 'web.check.role:admin,teknisi'], function () {
+        // PREFIX MASTER
+        Route::group(['prefix' => 'master'], function () {
+            Route::get('/device', action: [DeviceController::class, 'index'])->name('device');
+            Route::get('/faq', action: [DeviceFaqController::class, 'index'])->name('faq');
+        });
+    });
 
     // ADMIN AND MEMBER
     Route::group(['middleware' => 'web.check.role:admin,member'], function () {

@@ -25,6 +25,18 @@
                         <p>Setting Account</p>
                     </a>
                 </li>
+                <li class="nav-item ml-3 {{ $routename == 'device' ? 'active' : '' }}">
+                    <a href="{{ route('device') }}">
+                        <i class="fas fa-server"></i> {{-- Device --}}
+                        <p>Device</p>
+                    </a>
+                </li>
+                <li class="nav-item ml-3 {{ $routename == 'device-faq' ? 'active' : '' }}">
+                    <a href="{{ route('faq') }}">
+                        <i class="fas fa-question-circle"></i> {{-- Device FAQ --}}
+                        <p>Device FAQ</p>
+                    </a>
+                </li>
                 {{-- <li class="nav-section">
                     <span class="sidebar-mini-icon">
                         <i class="fa fa-ellipsis-h"></i>
