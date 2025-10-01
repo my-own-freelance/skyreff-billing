@@ -34,7 +34,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan="9" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -192,6 +192,50 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Manage Device -->
+    <div class="modal fade" id="manageDeviceModal" tabindex="-1" role="dialog"
+        aria-labelledby="manageDeviceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Manage Devices for Subscription <span id="subscriptionNumber"></span></h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 1rem;">
+                        <label for="addDeviceSelect" class="form-label fw-semibold">Add Device</label>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <!-- Select Input -->
+                            <select id="addDeviceSelect" style="flex: 1; padding: 0.375rem 0.75rem;">
+                                <option value="">-- Select Device --</option>
+                                @foreach ($devices as $device)
+                                    <option value="{{ $device->id }}">
+                                        {{ $device->name }}@if ($device->ip_address)
+                                            - {{ $device->ip_address }}
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <!-- Add Button -->
+                            <button style="padding: 0.375rem 1rem;" class="btn btn-primary" id="addDeviceBtn">
+                                Add Device
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6>Devices Used in Subscription</h6>
+                    <ul id="subscriptionDeviceList" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 @endsection
 
 @push('scripts')
@@ -481,5 +525,87 @@
 
             return false;
         }
+
+        // MANAGE DEVICE SUBSCRIPTION
+        let currentSubscriptionId = null;
+
+        function manageDevices(subscriptionId) {
+            currentSubscriptionId = subscriptionId;
+            $('#manageDeviceModal').modal('show');
+
+            // Panggil API devices berdasarkan route name
+            $.get(`{{ route('subscription.device', ['id' => ':id']) }}`.replace(':id', subscriptionId), function(res) {
+                if (res.status === 'success') {
+                    $('#subscriptionNumber').text(res.data.subscription_number);
+
+                    // Populate registered devices list
+                    renderRegisteredDevices(res.data.devices);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        // Render list device yang terdaftar
+        function renderRegisteredDevices(devices) {
+            let list = '';
+            devices.forEach(device => {
+                list += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${device.name}
+                    <button class="btn btn-danger btn-sm" onclick="removeDevice(${device.id})">Remove</button>
+                </li>`;
+            });
+            $('#subscriptionDeviceList').html(list);
+        }
+
+        // Tambah device
+        $('#addDeviceBtn').click(function() {
+            let deviceId = $('#addDeviceSelect').val();
+            if (!deviceId) return alert('Please select a device');
+
+            $.ajax({
+                url: `{{ route('subscription.add-device', ['id' => ':id']) }}`
+                    .replace(':id', currentSubscriptionId), // pastikan route ini ada di web.php/api.php
+                method: "POST",
+                data: {
+                    device_id: deviceId
+                },
+                beforeSend: function() {
+                    console.log("Loading...")
+                },
+                success: function(res) {
+                    showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
+                    manageDevices(currentSubscriptionId); // reload list
+                },
+                error: function(err) {
+                    console.log("error :", err);
+                    showMessage("danger", "flaticon-error", "Peringatan", err.message || err
+                        .responseJSON
+                        ?.message);
+                }
+            });
+        });
+
+
+        // Hapus device
+        function removeDevice(deviceId) {
+            if (!confirm('Are you sure?')) return;
+
+            $.ajax({
+                url: `{{ route('subscription.remove-device', ['id' => ':id', 'deviceId' => ':deviceId']) }}`
+                    .replace(':id', currentSubscriptionId)
+                    .replace(':deviceId', deviceId),
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(res) {
+                    if (res.status === 'success') manageDevices(currentSubscriptionId);
+                    else alert(res.message);
+                }
+            });
+        }
+
+        // END MANAAGE DEVICE SUBSCRIPTION
     </script>
 @endpush

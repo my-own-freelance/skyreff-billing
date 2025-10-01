@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Device;
+use App\Models\DeviceSubscription;
 use App\Models\Invoice;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -19,12 +21,13 @@ class SubscriptionController extends Controller
 {
     public function index()
     {
-        $title = 'Master Subscription';
+        $title = 'Manage Subscription';
         $technicians = User::where('role', 'teknisi')->get();
         $members = User::where('role', 'member')->get();
         $plans = Plan::all();
+        $devices = Device::where('is_active', 'Y')->get();
 
-        return view('pages.dashboard.admin.subscription', compact('title', 'technicians', 'members', 'plans'));
+        return view('pages.dashboard.admin.subscription', compact('title', 'technicians', 'members', 'plans', 'devices'));
     }
 
     // API DataTable
@@ -56,6 +59,8 @@ class SubscriptionController extends Controller
                     </button>
                     <div class='dropdown-menu' aria-labelledby='dropdown-{$item->id}' data-dropdown-out='fadeOut'>
                         <a class='dropdown-item' onclick='return getData(\"{$item->id}\");' href='javascript:void(0);' title='Edit'>Edit</a>
+                        <a class='dropdown-item' onclick='return manageDevices(\"{$item->id}\");' href='javascript:void(0);' title='Manage Devices'>Manage Devices</a>
+                        <hr>
                         <a class='dropdown-item' onclick='return generateInvoice(\"{$item->id}\");' href='javascript:void(0);' title='Generate Invoice'>Generate Invoice</a>
                     </div>
                 </div>";
@@ -482,5 +487,84 @@ class SubscriptionController extends Controller
                 'message' => $err->getMessage(),
             ], 500);
         }
+    }
+
+
+    // MANAGE DEVICE SUBSCRIPTION
+
+    // 1. Tampilkan device yang digunakan subscription tertentu
+    public function subscriptionDevices($subscriptionId)
+    {
+        $subscription = Subscription::with('devices')->find($subscriptionId);
+        if (!$subscription) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Subscription not found',
+            ], 404);
+        }
+
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $subscription,
+        ]);
+    }
+
+    // 2. Tambahkan device ke subscription
+    public function addDevice(Request $request, $subscriptionId)
+    {
+        $request->validate([
+            'device_id' => 'required|exists:devices,id',
+        ]);
+
+        $subscription = Subscription::find($subscriptionId);
+        if (!$subscription) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Subscription not found',
+            ], 404);
+        }
+
+        // cek apakah sudah ada
+        $exists = DeviceSubscription::where('subscription_id', $subscriptionId)
+            ->where('device_id', $request->device_id)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Device already added to subscription',
+            ], 400);
+        }
+
+        DeviceSubscription::create([
+            'subscription_id' => $subscriptionId,
+            'device_id' => $request->device_id,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Device added successfully',
+        ]);
+    }
+
+    // 3. Hapus device dari subscription
+    public function removeDevice($subscriptionId, $deviceId)
+    {
+        $deleted = DeviceSubscription::where('subscription_id', $subscriptionId)
+            ->where('device_id', $deviceId)
+            ->delete();
+
+        if (!$deleted) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Device not found for subscription',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Device removed successfully',
+        ]);
     }
 }

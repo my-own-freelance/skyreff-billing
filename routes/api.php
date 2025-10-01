@@ -116,11 +116,14 @@ Route::group(['middleware' => 'check.auth'], function () {
             // SUBSCRIPTION
             Route::group(['prefix' => 'subscription'], function () {
                 Route::get('datatable', [SubscriptionController::class, 'dataTable'])->name('subscription.datatable');
-                Route::get('{id}/detail', [SubscriptionController::class, 'getDetail'])->name('subscription.detail');
                 Route::post('create', [SubscriptionController::class, 'create'])->name('subscription.create');
                 Route::post('update', [SubscriptionController::class, 'update'])->name('subscription.update');
                 Route::post('update-status', [SubscriptionController::class, 'updateStatus'])->name('subscription.change-status');
                 Route::post('generate-invoice', [SubscriptionController::class, 'generateInvoice'])->name('subscription.generate-invoice');
+                Route::get('{id}/detail', [SubscriptionController::class, 'getDetail'])->name('subscription.detail');
+                Route::get('/{id}/devices', [SubscriptionController::class, 'subscriptionDevices'])->name('subscription.device');
+                Route::post('/{id}/devices', [SubscriptionController::class, 'addDevice'])->name('subscription.add-device');
+                Route::delete('/{id}/devices/{deviceId}', [SubscriptionController::class, 'removeDevice'])->name('subscription.remove-device');
             });
 
             // ANNOUNCEMENT

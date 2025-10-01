@@ -46,4 +46,9 @@ class Subscription extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function devices()
+    {
+        return $this->belongsToMany(Device::class, 'device_subscriptions');
+    }
 }
