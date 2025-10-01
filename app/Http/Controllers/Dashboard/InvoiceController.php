@@ -14,7 +14,9 @@ class InvoiceController extends Controller
     public function index()
     {
         $title = 'Invoice';
-        return view('pages.dashboard.admin.invoice', compact('title'));
+        $pageUrl = "pages.dashboard.admin.invoice";
+        if (auth()->user()->role == "member") $pageUrl = "pages.dashboard.member.invoice";
+        return view($pageUrl, compact('title'));
     }
 
     public function dataTable(Request $request)
@@ -38,13 +40,18 @@ class InvoiceController extends Controller
                 });
             }
 
+            $user = auth()->user();
+            if ($user->role == "member") {
+                $query->where("user_id", $user->id);
+            }
+
             $recordsFiltered = $query->count();
             $data = $query->orderBy('id', 'desc')
                 ->skip($request->query('start'))
                 ->limit($request->query('length'))
                 ->get();
 
-            $output = $data->map(function ($item) {
+            $output = $data->map(function ($item) use ($user) {
                 // Build action dropdown
                 $action = "<div class='dropdown-primary dropdown open'>
                 <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' 
@@ -62,6 +69,19 @@ class InvoiceController extends Controller
                 }
 
                 $action .= "</div></div>";
+
+                // JIKA MEMBER MAKA BTN ACTION HILANG
+                if ($user->role == "member") {
+                    $action = "<div class='dropdown-primary dropdown open'>
+                        <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' 
+                            id='dropdown-{$item->id}' data-toggle='dropdown' aria-haspopup='true' aria-expanded='true'>
+                            Aksi
+                        </button>
+                        <div class='dropdown-menu' aria-labelledby='dropdown-{$item->id}' data-dropdown-out='fadeOut'>
+                            <a class='dropdown-item' onclick='return printInvoice(\"{$item->id}\");' href='javascript:void(0);' title='Print Invoice'>Print</a>
+                        </div>
+                    </div>";
+                }
 
                 $statusLabel = match ($item->status) {
                     'paid' => '<span class="badge badge-success">Paid</span>',
@@ -88,10 +108,22 @@ class InvoiceController extends Controller
                     ->locale('id') // bahasa Indonesia
                     ->translatedFormat('d M Y H:i')
                     : '-';
+                $item['paid_at_formatted'] = $item->paid_at
+                    ? Carbon::parse($item->paid_at)
+                    // ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                    ->locale('id') // bahasa Indonesia
+                    ->translatedFormat('d M Y H:i')
+                    : '-';
                 return $item;
             });
 
-            $total = Invoice::count();
+
+            $queryTotal = Invoice::query();
+            if ($user->role == "member") {
+                $queryTotal->where('user_id', $user->id);
+            }
+
+            $total = $queryTotal->count();
             return response()->json([
                 'draw' => $request->query('draw'),
                 'recordsFiltered' => $recordsFiltered,

@@ -66,14 +66,15 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
             Route::get('/ticket', [TicketController::class, 'index'])->name('ticket');
         });
+    });
+    // ADMIN AND TEKNISI ACCESS
 
+    // ADMIN AND MEMBER
+    Route::group(['middleware' => 'web.check.role:admin,member'], function () {
         // TRANSACTION
         Route::group(['prefix' => 'transaction'], function () {
             Route::get("/invoice", [InvoiceController::class, 'index'])->name('invoice');
             Route::get('/invoice/print/{id}', [InvoiceController::class, 'print'])->name('invoice.print');
         });
     });
-    // ADMIN AND TEKNISI ACCESS
-
-    // GLOBAL ACCESS
 });

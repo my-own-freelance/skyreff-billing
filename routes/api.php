@@ -152,7 +152,10 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::delete('delete', [TicketController::class, 'destroy'])->name('ticket.destroy');
             });
         });
+    });
 
+    // ADMIN AND MEMBER
+    Route::group(['middleware' => 'api.check.role:admin,member'], function () {
         // PREFIX TRANSACTION
         Route::group(['prefix' => 'transaction'], function () {
             // INVOICE

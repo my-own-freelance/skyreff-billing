@@ -114,35 +114,6 @@
             dTable.ajax.reload(null, false);
         }
 
-
-        function printInvoice(id) {
-            window.open("{{ url('dashboard/invoice/print') }}/" + id, "_blank");
-        }
-
-        function updateStatus(id, status) {
-            let c = confirm("Apakah anda yakin ingin mengubah status invoice ini menjadi " + status + "?");
-            if (c) {
-                $.ajax({
-                    url: "{{ route('invoice.change-status') }}",
-                    method: "POST",
-                    data: {
-                        id: id,
-                        status: status,
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(res) {
-                        refreshData();
-                        showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
-                    },
-                    error: function(err) {
-                        console.log("error :", err);
-                        showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
-                            ?.message);
-                    }
-                })
-            }
-        }
-
         function printInvoice(id) {
             const url = "{{ route('invoice.print', ':id') }}".replace(':id', id);
             window.open(url, '_blank'); // buka di tab baru
