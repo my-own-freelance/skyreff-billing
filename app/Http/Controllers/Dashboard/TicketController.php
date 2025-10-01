@@ -76,7 +76,12 @@ class TicketController extends Controller
                 $item['member_name'] = $item->member ? $item->member->name ?? '-' : '-';
                 $item['technician_name'] = $item->technician ? $item->technician->name ?? '-' : '-';
                 $item['type'] = ucfirst($item->type);
-                $item['created_at_formatted'] = $item->created_at ? Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y H:i') : '-';
+                $item['created_at_formatted'] = $item->created_at
+                    ? Carbon::parse($item->created_at)
+                    ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                    ->locale('id') // bahasa Indonesia
+                    ->translatedFormat('d M Y H:i')
+                    : '-';
                 return $item;
             });
 

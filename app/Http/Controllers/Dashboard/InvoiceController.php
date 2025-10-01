@@ -29,6 +29,9 @@ class InvoiceController extends Controller
                         ->orWhereHas('user', function ($uq) use ($searchValue) {
                             $uq->where('name', 'like', "%$searchValue%");
                         })
+                        ->orWhereHas('subscription', function ($uq) use ($searchValue) {
+                            $uq->where('subscription_number', 'like', "%$searchValue%");
+                        })
                         ->orWhereHas('plan', function ($pq) use ($searchValue) {
                             $pq->where('name', 'like', "%$searchValue%");
                         });
@@ -73,10 +76,18 @@ class InvoiceController extends Controller
                 $item['invoice_period'] = $item->invoice_period_start && $item->invoice_period_end
                     ? $item->invoice_period_start->format('Y-m-d') . ' s/d ' . $item->invoice_period_end->format('Y-m-d')
                     : '-';
-                $item['user_name'] = $item->user->name ?? '-';
+                $item['user_name'] = ($item->user)
+                    ? '<span><b>Name:</b> ' . e($item->user->name) . '</span><br>'
+                    . '<span><b>Username:</b> ' . e($item->user->username) . '</span>'
+                    : '-';
                 $item['plan_name'] = $item->plan->name ?? '-';
                 $item['subscription_number'] = $item->subscription->subscription_number ?? '-';
-
+                $item['created_at_formatted'] = $item->created_at
+                    ? Carbon::parse($item->created_at)
+                    ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                    ->locale('id') // bahasa Indonesia
+                    ->translatedFormat('d M Y H:i')
+                    : '-';
                 return $item;
             });
 
@@ -177,7 +188,7 @@ class InvoiceController extends Controller
             $updateData = ['status' => $data['status']];
 
             if ($data['status'] === 'paid') {
-                $updateData['paid_at'] = Carbon::now('Asia/Jakarta');;
+                $updateData['paid_at'] = Carbon::now('Asia/Jakarta');
 
                 // update subscription current period
                 if ($invoice->subscription) {

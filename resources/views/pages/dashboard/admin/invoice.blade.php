@@ -28,6 +28,7 @@
                             <thead>
                                 <tr>
                                     <th class="all">#</th>
+                                    <th class="all">Invoice Date</th>
                                     <th class="all">Invoice Number</th>
                                     <th class="all">Subscription Number</th>
                                     <th class="all">User</th>
@@ -39,7 +40,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan=98" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -124,6 +125,9 @@
                 ajax: url,
                 columns: [{
                         data: "action"
+                    },
+                    {
+                        data: "created_at_formatted"
                     },
                     {
                         data: "invoice_number"

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
 use App\Http\Controllers\Dashboard\InvoiceController;
@@ -35,6 +36,7 @@ Route::group(['middleware' => 'guest'], function () {
 Route::group(['middleware' => 'check.auth'], function () {
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'api.check.role:admin'], function () {
+        Route::get("/statistic-chart", [DashboardController::class, "getStatisticChart"])->name("statistic-chart");
         Route::get('/custom-template/detail', [WebConfigController::class, 'detail'])->name('web-config.detail');
         Route::post('/config/create-update', [WebConfigController::class, 'saveUpdateData'])->name('web-config.update');
 

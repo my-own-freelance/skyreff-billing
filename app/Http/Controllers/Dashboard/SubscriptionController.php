@@ -116,7 +116,10 @@ class SubscriptionController extends Controller
                 $item['identifier'] = $identifier;
                 $item['type'] = $type;
                 $item['plan_name'] = $item->plan->name ?? '-';
-                $item['member_name'] = $item->user->name ?? '-';
+                $item['member_name'] = ($item->user)
+                    ? '<span><b>Name:</b> ' . e($item->user->name) . '</span><br>'
+                    . '<span><b>Username:</b> ' . e($item->user->username) . '</span>'
+                    : '-';
                 $item['current_period'] = $item->current_period_start && $item->current_period_end
                     ? $item->current_period_start->format('Y-m-d') . ' s/d ' . $item->current_period_end->format('Y-m-d')
                     : '-';
