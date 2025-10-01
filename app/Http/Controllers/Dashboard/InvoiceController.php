@@ -70,7 +70,7 @@ class InvoiceController extends Controller
 
                 $action .= "</div></div>";
 
-                // JIKA MEMBER MAKA BTN ACTION HILANG
+                // JIKA MEMBER MAKA BTN ACTION HANYA PRINT
                 if ($user->role == "member") {
                     $action = "<div class='dropdown-primary dropdown open'>
                         <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' 

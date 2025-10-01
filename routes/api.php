@@ -101,7 +101,6 @@ Route::group(['middleware' => 'check.auth'], function () {
         Route::group(['prefix' => 'manage'], function () {
             // SUBSCRIPTION
             Route::group(['prefix' => 'subscription'], function () {
-                Route::get('datatable', [SubscriptionController::class, 'dataTable'])->name('subscription.datatable');
                 Route::post('create', [SubscriptionController::class, 'create'])->name('subscription.create');
                 Route::post('update', [SubscriptionController::class, 'update'])->name('subscription.update');
                 Route::post('update-status', [SubscriptionController::class, 'updateStatus'])->name('subscription.change-status');
@@ -163,6 +162,13 @@ Route::group(['middleware' => 'check.auth'], function () {
 
     // ADMIN AND MEMBER
     Route::group(['middleware' => 'api.check.role:admin,member'], function () {
+        // MANAGE
+        Route::group(['prefix' => 'manage'], function () {
+            Route::group(['prefix' => 'subscription'], function () {
+                Route::get('datatable', [SubscriptionController::class, 'dataTable'])->name('subscription.datatable');
+            });
+        });
+
         // PREFIX TRANSACTION
         Route::group(['prefix' => 'transaction'], function () {
             // INVOICE

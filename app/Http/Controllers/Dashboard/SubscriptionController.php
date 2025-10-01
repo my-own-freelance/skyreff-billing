@@ -26,8 +26,10 @@ class SubscriptionController extends Controller
         $members = User::where('role', 'member')->get();
         $plans = Plan::all();
         $devices = Device::where('is_active', 'Y')->get();
+        $pageUrl = "pages.dashboard.admin.subscription";
+        if (auth()->user()->role == "member") $pageUrl = "pages.dashboard.member.subscription";
 
-        return view('pages.dashboard.admin.subscription', compact('title', 'technicians', 'members', 'plans', 'devices'));
+        return view($pageUrl, compact('title', 'technicians', 'members', 'plans', 'devices'));
     }
 
     // API DataTable
@@ -38,20 +40,31 @@ class SubscriptionController extends Controller
 
             if ($request->query('search')) {
                 $searchValue = $request->query('search')['value'];
-                $query->whereHas('user', function ($q) use ($searchValue) {
-                    $q->where('name', 'like', "%$searchValue%")->orWhere('username', 'like', "%$searchValue%");
-                })->orWhereHas('plan', function ($q) use ($searchValue) {
-                    $q->where('name', 'like', "%$searchValue%");
+                $query->where(function ($q) use ($searchValue) {
+                    $q->whereHas('user', function ($q2) use ($searchValue) {
+                        $q2->where('name', 'like', "%$searchValue%")
+                            ->orWhere('username', 'like', "%$searchValue%");
+                    })
+                        ->orWhereHas('plan', function ($q2) use ($searchValue) {
+                            $q2->where('name', 'like', "%$searchValue%");
+                        });
                 });
             }
 
+            $user = auth()->user();
+            if ($user->role == "member") {
+                $query->where("user_id", $user->id);
+            }
+
             $recordsFiltered = $query->count();
+
             $data = $query->orderBy('id', 'desc')
                 ->skip($request->query('start'))
                 ->limit($request->query('length'))
                 ->get();
 
-            $output = $data->map(function ($item) {
+
+            $output = $data->map(function ($item) use ($user) {
                 $action = "
                 <div class='dropdown-primary dropdown open'>
                     <button class='btn btn-sm btn-primary dropdown-toggle waves-effect waves-light' id='dropdown-{$item->id}' data-toggle='dropdown' aria-haspopup='true' aria-expanded='true'>
@@ -91,6 +104,12 @@ class SubscriptionController extends Controller
                         </div>
                     </div>';
 
+                // JIKA MEMBER MAKA BTN ACTION HILANG
+                if ($user->role == "member") {
+                    $action = "";
+                    $status = $item->status == "active" ? "<span class='badge badge-success'>Active</span>" : "<span class='badge badge-error'>Isolir</span>";
+                }
+
                 $identifier = ($item->type == "pppoe" || $item->type == "hotspot")
                     ?
                     '<div>
@@ -128,12 +147,18 @@ class SubscriptionController extends Controller
                 return $item;
             });
 
-            $total = Subscription::count();
+            $queryTotal = Subscription::query();
+            if ($user->role == "member") {
+                $queryTotal->where('user_id', $user->id);
+            }
+
+            $total = $queryTotal->count();
             return response()->json([
                 'draw' => $request->query('draw'),
                 'recordsFiltered' => $recordsFiltered,
                 'recordsTotal' => $total,
                 'data' => $output,
+                'role' => $user->role
             ]);
         } catch (\Throwable $err) {
             return response()->json([

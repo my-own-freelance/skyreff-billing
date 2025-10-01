@@ -60,7 +60,6 @@ Route::group(['middleware' => 'auth:web'], function () {
 
         // PREFIX MANAGE
         Route::group(['prefix' => 'manage'], function () {
-            Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription');
             Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
             Route::get('/ticket', [TicketController::class, 'index'])->name('ticket');
         });
@@ -76,6 +75,11 @@ Route::group(['middleware' => 'auth:web'], function () {
 
     // ADMIN AND MEMBER
     Route::group(['middleware' => 'web.check.role:admin,member'], function () {
+        // PREFIX MANAGE
+        Route::group(['prefix' => 'manage'], function () {
+            Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription');
+        });
+
         // TRANSACTION
         Route::group(['prefix' => 'transaction'], function () {
             Route::get("/invoice", [InvoiceController::class, 'index'])->name('invoice');

@@ -25,6 +25,12 @@
                         <p>Setting Account</p>
                     </a>
                 </li>
+                <li class="nav-item ml-3 {{ $routename == 'subscription' ? 'active' : '' }}">
+                    <a href="{{ route('subscription') }}">
+                        <i class="fas fa-sync-alt"></i> {{-- Subscription --}}
+                        <p>Subscription</p>
+                    </a>
+                </li>
                 <li class="nav-item ml-3 {{ $routename == 'invoice' ? 'active' : '' }}">
                     <a href="{{ route('invoice') }}">
                         <i class="fas fa-file-invoice-dollar"></i> {{-- Invoice --}}
