@@ -77,8 +77,8 @@
                     </span>
                     <h4 class="text-section">MANAGE</h4>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'subscription' ? 'active' : '' }}">
+                    <a href="{{route('subscription')}}">
                         <i class="fas fa-sync-alt"></i> {{-- Subscription --}}
                         <p>Subscription</p>
                     </a>

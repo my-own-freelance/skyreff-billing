@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->enum('status', ['active', 'isolir'])->default('active');
+            $table->enum('type', ['pppoe', 'hotspot', 'static'])->default('pppoe');
             $table->string('username')->nullable(); // PPPoE username
             $table->string('password')->nullable(); // encrypt if needed
             $table->string('queue')->nullable(); // STATIC queue
