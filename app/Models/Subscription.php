@@ -11,6 +11,7 @@ class Subscription extends Model
 
     protected $fillable = [
         'status',
+        'subscription_number',
         'type',
         'username',
         'password',

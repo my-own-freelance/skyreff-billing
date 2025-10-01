@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->enum('status', ['unpaid', 'paid', 'expired'])->default('unpaid');
+            $table->enum('status', ['unpaid', 'paid', 'expired', 'cancel'])->default('unpaid');
             $table->string('invoice_number')->unique();
             $table->unsignedBigInteger('amount')->default(0);
             $table->timestamp('invoice_period_start')->nullable();

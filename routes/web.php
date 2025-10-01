@@ -6,6 +6,7 @@ use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
+use App\Http\Controllers\Dashboard\InvoiceController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\PlanController;
@@ -62,6 +63,12 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription');
             Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
             Route::get('/ticket', [TicketController::class, 'index'])->name('ticket');
+        });
+
+        // TRANSACTION
+        Route::group(['prefix' => 'transaction'], function () {
+            Route::get("/invoice", [InvoiceController::class, 'index'])->name('invoice');
+            Route::get('/invoice/print/{id}', [InvoiceController::class, 'print'])->name('invoice.print');
         });
     });
     // ADMIN AND TEKNISI ACCESS

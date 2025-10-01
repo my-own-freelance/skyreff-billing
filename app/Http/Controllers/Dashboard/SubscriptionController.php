@@ -205,10 +205,14 @@ class SubscriptionController extends Controller
                 ], 400);
             }
 
+            // Generate nomor invoice unik (format bisa disesuaikan, misal INV20231001-0001)
+            $subscriptionNumber = 'SUBS' . now()->format('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+
             // buat subscription
             $subscription = Subscription::create([
                 'user_id' => $data['user_id'],
                 'plan_id' => $data['plan_id'],
+                'subscription_number' => $subscriptionNumber,
                 'type' => $data['type'] ?? null,
                 'username' => $data['username'] ?? null,
                 'password' => $data['password'] ?? null,

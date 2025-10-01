@@ -78,7 +78,7 @@
                     <h4 class="text-section">MANAGE</h4>
                 </li>
                 <li class="nav-item ml-3 {{ $routename == 'subscription' ? 'active' : '' }}">
-                    <a href="{{route('subscription')}}">
+                    <a href="{{ route('subscription') }}">
                         <i class="fas fa-sync-alt"></i> {{-- Subscription --}}
                         <p>Subscription</p>
                     </a>
@@ -115,8 +115,8 @@
                     </span>
                     <h4 class="text-section">TRANSACTION</h4>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3 {{ $routename == 'invoice' ? 'active' : '' }}">
+                    <a href="{{ route('invoice') }}">
                         <i class="fas fa-file-invoice-dollar"></i> {{-- Invoice --}}
                         <p>Invoice</p>
                     </a>

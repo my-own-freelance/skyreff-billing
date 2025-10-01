@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
+use App\Http\Controllers\Dashboard\InvoiceController;
 use App\Http\Controllers\Dashboard\MemberController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\PlanController;
@@ -140,6 +141,16 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [TicketController::class, 'update'])->name('ticket.update');
                 Route::post('update-status', [TicketController::class, 'updateStatus'])->name('ticket.change-status');
                 Route::delete('delete', [TicketController::class, 'destroy'])->name('ticket.destroy');
+            });
+        });
+
+        // PREFIX TRANSACTION
+        Route::group(['prefix' => 'transaction'], function () {
+            // INVOICE
+            Route::group(['prefix' => 'invoice'], function () {
+                Route::get('datatable', [InvoiceController::class, 'dataTable'])->name('invoice.datatable');
+                Route::get('{id}/detail', [InvoiceController::class, 'getDetail'])->name('invoice.detail');
+                Route::post('update-status', [InvoiceController::class, 'updateStatus'])->name('invoice.change-status');
             });
         });
     });

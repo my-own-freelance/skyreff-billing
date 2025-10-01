@@ -22,6 +22,7 @@
                             <thead>
                                 <tr>
                                     <th class="all">#</th>
+                                    <th class="all">Subscription Number</th>
                                     <th class="all">Member</th>
                                     <th class="all">Plan</th>
                                     <th class="all">Tipe</th>
@@ -255,6 +256,9 @@
                         data: "action"
                     },
                     {
+                        data: "subscription_number"
+                    },
+                    {
                         data: "member_name"
                     },
                     {
@@ -464,6 +468,9 @@
                 success: function(res) {
                     showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
                     refreshData();
+                    setTimeout(() => {
+                        window.location.href = "{{ route('invoice') }}";
+                    }, 3000)
                 },
                 error: function(err) {
                     console.log("error :", err);
