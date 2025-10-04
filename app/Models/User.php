@@ -28,6 +28,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'link_maps',
+        'commission',
         'last_login_at',
         'is_active',
         'area_id',
@@ -83,5 +84,11 @@ class User extends Authenticatable
     public function invoices()
     {
         return $this->hasMany(Invoice::class, 'user_id');
+    }
+
+    // Relasi ke mutasi
+    public function mutations()
+    {
+        return $this->belongsTo(Mutation::class, 'user_id');
     }
 }

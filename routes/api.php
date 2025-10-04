@@ -74,6 +74,7 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [TeknisiController::class, 'update'])->name('teknisi.update');
                 Route::post('update-status', [TeknisiController::class, 'updateStatus'])->name('teknisi.change-status');
                 Route::delete('delete', [TeknisiController::class, 'destroy'])->name('teknisi.destroy');
+                Route::post('set-commission', [TeknisiController::class, 'setCommission'])->name('teknisi.set-commission');
             });
 
             // MEMBER

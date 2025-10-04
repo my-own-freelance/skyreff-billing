@@ -25,12 +25,13 @@
                                     <th class="all">Nama</th>
                                     <th class="all">Username</th>
                                     <th class="all">Phone</th>
+                                    <th class="all">Komisi</th>
                                     <th class="all">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="6" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan="7" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -95,10 +96,52 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Set Komisi -->
+    <div class="modal fade" id="modalSetCommission" tabindex="-1" role="dialog" aria-labelledby="modalSetCommissionLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form id="formSetCommission">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalSetCommissionLabel">Set Komisi Teknisi</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="commission_user_id">
+
+                        <div class="form-group">
+                            <label for="type">Tipe Komisi</label>
+                            <select class="form-control" id="type" name="type" required>
+                                <option value="tambah">Tambah Komisi</option>
+                                <option value="potong">Potong Komisi</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Nominal Komisi</label>
+                            <input type="number" class="form-control" id="amount" name="amount" min="1"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 @endsection
 @push('scripts')
     <script src="{{ asset('/dashboard/js/plugin/datatables/datatables.min.js') }}"></script>
     <script>
+        let teknisiId = null;
         let dTable = null;
 
         $(function() {
@@ -126,6 +169,8 @@
                     data: "username"
                 }, {
                     data: "phone"
+                }, {
+                    data: "commission"
                 }, {
                     data: "is_active"
                 }],
@@ -275,5 +320,47 @@
                 }
             })
         }
+
+
+        // dipanggil dari datatable action onclick
+        function setCommission(id) {
+            teknisiId = id;
+            document.getElementById("commission_user_id").value = id;
+            $("#modalSetCommission").modal("show");
+        }
+
+        // submit form ajax
+        $("#formSetCommission").on("submit", function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "{{ route('teknisi.set-commission') }}", // route controller
+                method: "POST",
+                data: $(this).serialize(),
+                success: function(res) {
+                    if (res.status === "success") {
+                        showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
+                        // reset form
+                        $("#formSetCommission")[0].reset();
+                        $("#modalSetCommission").modal("hide");
+                        $('#datatable').DataTable().ajax.reload(null, false); // reload datatable
+                    } else {
+                        showMessage("danger", "flaticon-error", "Peringatan", err.message || err
+                            .responseJSON
+                            ?.message);
+                    }
+                },
+                error: function(xhr) {
+                    showMessage("danger", "flaticon-error", "Peringatan", err.message || err
+                        .responseJSON
+                        ?.message);
+                }
+            });
+        });
+        
+        // reset form otomatis setiap kali modal ditutup manual
+        $("#modalSetCommission").on("hidden.bs.modal", function() {
+            $("#formSetCommission")[0].reset();
+        });
     </script>
 @endpush

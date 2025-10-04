@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Mutation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class TeknisiController extends Controller
 {
     public function index()
     {
-        $title = 'Data Owner';
+        $title = 'Data Teknisi';
         return view('pages.dashboard.admin.teknisi', compact('title'));
     }
 
@@ -38,7 +41,6 @@ class TeknisiController extends Controller
 
             $user = auth()->user();
             $output = $data->map(function ($item) use ($user) {
-                $action_delete = $user->id != $item->id ? "<a class='dropdown-item' onclick='return removeData(\"{$item->id}\");' href='javascript:void(0)' title='Hapus'>Hapus</a>" : '';
 
                 $action =
                     "<div class='dropdown-primary dropdown open'>
@@ -47,9 +49,8 @@ class TeknisiController extends Controller
                             </button>
                             <div class='dropdown-menu' aria-labelledby='dropdown-{$item->id}' data-dropdown-out='fadeOut'>
                                 <a class='dropdown-item' onclick='return getData(\"{$item->id}\");' href='javascript:void(0);' title='Edit'>Edit</a>
-                                " .
-                    $action_delete .
-                    "
+                                <a class='dropdown-item' onclick='return setCommission(\"{$item->id}\");' href='javascript:void(0);' title='Komisi'>Komisi</a>
+                                <a class='dropdown-item' onclick='return removeData(\"{$item->id}\");' href='javascript:void(0)' title='Hapus'>Hapus</a>
                             </div>
                         </div>";
 
@@ -82,6 +83,8 @@ class TeknisiController extends Controller
 
                 $item['action'] = $action;
                 $item['is_active'] = $user->id != $item->id ? $is_active : '';
+                $item["commission"] = "Rp. "  . number_format($item->commission, 0, ',', '.');
+
                 return $item;
             });
 
@@ -370,6 +373,76 @@ class TeknisiController extends Controller
                 ],
                 500,
             );
+        }
+    }
+
+    public function setCommission(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $data = $request->all();
+            $rules = [
+                'user_id' => 'required|exists:users,id',
+                'type' => 'required|in:tambah,potong',
+                'amount' => 'required|integer|min:1',
+            ];
+
+            $messages = [
+                'user_id.required' => 'Teknisi harus dipilih',
+                'user_id.exists' => 'Teknisi tidak ditemukan',
+                'type.required' => 'Tipe komisi harus dipilih',
+                'type.in' => 'Tipe komisi tidak sesuai',
+                'amount.required' => 'Jumlah komisi harus diisi',
+                'amount.integer' => 'Jumlah komisi harus berupa angka',
+                'amount.min' => 'Jumlah komisi minimal 1',
+            ];
+
+            $validator = Validator::make($data, $rules, $messages);
+            if ($validator->fails()) {
+                return response()->json(
+                    [
+                        'status' => 'error',
+                        'message' => $validator->errors()->first(),
+                    ],
+                    400,
+                );
+            }
+
+            $user = User::findOrFail($request->user_id);
+
+            $lastCommission = $user->commission ?? 0;
+            $amount = $request->type === 'potong' ? -$request->amount : $request->amount;
+
+            // buat record mutation
+            $mutation = Mutation::create([
+                'code' => Str::upper(Str::random(10)),
+                'amount' => $amount,
+                'type' => 'C',
+                'first_commission' => $lastCommission,
+                'last_commission' => $lastCommission + $amount,
+                'bank_name' => '-', // default karena bukan withdraw
+                'bank_account' => '-', // default
+                'status' => 'SUCCESS',
+                'user_id' => $user->id,
+            ]);
+
+            // update commission user
+            $user->commission = $lastCommission + $amount;
+            $user->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Komisi berhasil diperbarui',
+                'data' => $mutation,
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => $th->getMessage(),
+            ], 500);
         }
     }
 }
