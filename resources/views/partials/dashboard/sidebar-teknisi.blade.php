@@ -19,7 +19,7 @@
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
+                <li class="nav-item ml-3 {{ $routename == 'user.account' ? 'active' : '' }}">
                     <a href="{{ route('user.account') }}">
                         <i class="fas fa-user-cog"></i>
                         <p>Setting Account</p>
@@ -31,10 +31,16 @@
                         <p>Device</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'device-faq' ? 'active' : '' }}">
+                <li class="nav-item ml-3 {{ $routename == 'faq' ? 'active' : '' }}">
                     <a href="{{ route('faq') }}">
                         <i class="fas fa-question-circle"></i> {{-- Device FAQ --}}
                         <p>Device FAQ</p>
+                    </a>
+                </li>
+                <li class="nav-item ml-3 {{ $routename == 'mutation' ? 'active' : '' }}"">
+                    <a href="{{ route('mutation') }}">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <p>Mutation</p>
                     </a>
                 </li>
                 {{-- <li class="nav-section">

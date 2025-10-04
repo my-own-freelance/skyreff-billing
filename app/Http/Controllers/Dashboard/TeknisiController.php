@@ -415,7 +415,7 @@ class TeknisiController extends Controller
 
             // buat record mutation
             $mutation = Mutation::create([
-                'code' => Str::upper(Str::random(10)),
+                'code' => "COMMI" . strtoupper(Str::random(5)),
                 'amount' => $amount,
                 'type' => 'C',
                 'first_commission' => $lastCommission,

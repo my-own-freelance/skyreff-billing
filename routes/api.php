@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
 use App\Http\Controllers\Dashboard\InvoiceController;
 use App\Http\Controllers\Dashboard\MemberController;
+use App\Http\Controllers\Dashboard\MutationController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\SubscriptionController;
@@ -35,6 +36,7 @@ Route::group(['middleware' => 'guest'], function () {
 });
 
 Route::group(['middleware' => 'check.auth'], function () {
+    Route::get("/statik-session", [DashboardController::class, "getStatikSession"])->name("statik-session");
     Route::get("/account/detail", [UserController::class, "getDetailAccount"])->name("user.detail-account");
     Route::post("/account/update", [UserController::class, "updateAccountReseller"])->name("user.update-account");
 
@@ -159,6 +161,20 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::delete('delete', [DeviceFaqController::class, 'destroy'])->name('faq.destroy');
             });
         });
+
+        Route::group(['prefix' => 'transaction'], function () {
+            // INVOICE
+            Route::group(['prefix' => 'mutation'], function () {
+                Route::get('datatable', [MutationController::class, 'dataTable'])->name('mutation.datatable');
+            });
+
+            // MUTASI / KOMISI
+            Route::group(['prefix' => 'commission'], function () {
+                Route::get("/datatable", [MutationController::class, "dataTable"])->name('commission.datatable');
+                Route::post("/update-status", [MutationController::class, "changeStatus"])->name('commission.change-status');
+                Route::get("/{id}/detail", [MutationController::class, "getDetail"])->name('commission.detail');
+            });
+        });
     });
 
     // ADMIN AND MEMBER
@@ -178,6 +194,13 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::get('{id}/detail', [InvoiceController::class, 'getDetail'])->name('invoice.detail');
                 Route::post('update-status', [InvoiceController::class, 'updateStatus'])->name('invoice.change-status');
             });
+        });
+    });
+
+    // ONLY TEKNISI
+    Route::group(["middleware" => "web.check.role:teknisi"], function () {
+        Route::group(['prefix' => 'transaction'], function () {
+            Route::post('/commission/create', [MutationController::class, "create"])->name("commission.create");
         });
     });
 });

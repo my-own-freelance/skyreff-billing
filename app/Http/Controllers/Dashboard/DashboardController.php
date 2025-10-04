@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Invoice;
+use App\Models\Mutation;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
@@ -44,6 +45,17 @@ class DashboardController extends Controller
                 "announcements" => $announcements,
             ];
         } else if ($user->role == "teknisi") {
+            $teknisi = User::where("id", $user->id)->first();
+            $wdCommisson = Mutation::where('user_id', $user->id)->whereIn('status', ['PENDING', 'PROCESS'])->sum('amount') ?? 0;
+
+            $tglAwal = Carbon::now('UTC')->startOfMonth()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
+            $tglAkhir = Carbon::now('UTC')->endOfMonth()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
+            $commissionThisMonth = Mutation::where("type", "C")->where("user_id", $teknisi->id)->whereBetween("created_at", [$tglAwal, $tglAkhir])->sum("amount") ?? 0;
+            $data = [
+                "commission" => 'Rp. ' . number_format($teknisi->commission, 0, ',', '.'),
+                "wd_commission" => 'Rp. ' . number_format($wdCommisson, 0, ',', '.'),
+                "month_commission" => 'Rp. ' . number_format($commissionThisMonth, 0, ',', '.'),
+            ];
         } else {
             // ADMIN
             // Tahun sekarang
@@ -98,72 +110,6 @@ class DashboardController extends Controller
         }
         return view($pageUrl, compact("title", "data"));
     }
-
-    // public function getStatisticChart()
-    // {
-    //     try {
-    //         $year = Carbon::now()->year;
-
-    //         // Array bulan 1-12
-    //         $months = range(1, 12);
-
-    //         // Ambil total amount per bulan untuk invoice yang statusnya paid
-    //         $statistics = Invoice::selectRaw('
-    //             MONTH(paid_at) as month,
-    //             SUM(amount) as total_sales
-    //         ')
-    //             ->where('status', 'paid')
-    //             ->whereYear('paid_at', $year)
-    //             ->groupBy('month')
-    //             ->orderBy('month')
-    //             ->get()
-    //             ->keyBy('month'); // jadikan array keyed by month
-
-    //         // Pastikan semua bulan ada datanya, meskipun 0
-    //         $totalSalesData = [];
-    //         foreach ($months as $month) {
-    //             $totalSalesData[] = $statistics[$month]->total_sales ?? 0;
-    //         }
-
-    //         // Struktur data output untuk chart
-    //         $data = [
-    //             [
-    //                 "label" => "Total Penjualan",
-    //                 "borderColor" => "#177dff",
-    //                 "pointBackgroundColor" => "rgba(23, 125, 255, 0.6)",
-    //                 "pointRadius" => 0,
-    //                 "backgroundColor" => "rgba(23, 125, 255, 0.4)",
-    //                 "legendColor" => "#177dff",
-    //                 "fill" => true,
-    //                 "borderWidth" => 2,
-    //                 "data" => $totalSalesData
-    //             ]
-    //         ];
-
-    //         return response()->json([
-    //             "status" => "success",
-    //             "data" => $data
-    //         ]);
-    //     } catch (\Throwable $err) {
-    //         return response()->json([
-    //             "status" => "error",
-    //             "message" => $err->getMessage(),
-    //             "data" => [
-    //                 [
-    //                     "label" => "Total Penjualan",
-    //                     "borderColor" => "#177dff",
-    //                     "pointBackgroundColor" => "rgba(23, 125, 255, 0.6)",
-    //                     "pointRadius" => 0,
-    //                     "backgroundColor" => "rgba(23, 125, 255, 0.4)",
-    //                     "legendColor" => "#177dff",
-    //                     "fill" => true,
-    //                     "borderWidth" => 2,
-    //                     "data" => array_fill(0, 12, 0)
-    //                 ]
-    //             ]
-    //         ], 500);
-    //     }
-    // }
 
     public function getStatisticChart()
     {
@@ -226,6 +172,29 @@ class DashboardController extends Controller
                 "status" => "error",
                 "message" => $err->getMessage(),
                 "data" => []
+            ], 500);
+        }
+    }
+
+    public function getStatikSession()
+    {
+        try {
+            $user = User::find(auth()->user()->id);
+            if (!$user) {
+                return response()->json([
+                    "status" => "error",
+                    "message" => "User session not found !"
+                ]);
+            }
+
+            return response()->json([
+                "status" => "success",
+                "data" => $user
+            ]);
+        } catch (\Throwable $err) {
+            return response()->json([
+                "status" => "error",
+                "message" => $err->getMessage(),
             ], 500);
         }
     }

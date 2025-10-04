@@ -58,6 +58,8 @@ class UserController extends Controller
                 "phone" => "required|string|digits_between:10,15",
                 "link_map" => "nullable|url",
                 "address" => "required|string",
+                "bank_type" => "nullable|string",
+                "bank_account" => "nullable|string",
             ];
 
             if ($data && $data['password'] != "") {

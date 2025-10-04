@@ -75,6 +75,10 @@
     @include('partials.dashboard.scripts')
     @stack('scripts')
     <script>
+        $(function() {
+            getSessionStatik();
+        });
+
         function convertToRupiah(angka) {
             var rupiah = '';
             var angkarev = angka.toString().split('').reverse().join('');
@@ -82,6 +86,22 @@
                 if (i % 3 == 0) rupiah += angkarev.substr(i, 3) + '.';
             return 'Rp. ' + rupiah.split('', rupiah.length - 1).reverse().join('');
         }
+
+        function getSessionStatik() {
+            $.ajax({
+                url: "{{ route('statik-session') }}",
+                header: {
+                    'Content-Type': 'application/json'
+                },
+                success: function(resp) {
+                    let data = resp.data;
+                    $("#w1_balanceTeknisi").html(convertToRupiah(data.commission));
+                },
+                error: function(err) {
+                    console.log("error get static session :", err)
+                }
+            })
+        };
     </script>
 </body>
 

@@ -21,6 +21,8 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->string('link_maps')->nullable();
             $table->integer('commission')->default(0); // komisi untuk teknisi
+            $table->string('bank_type')->nullable();
+            $table->string('bank_account')->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->enum('is_active', ['Y', 'N'])->default('Y');
             $table->foreignId('area_id')->nullable()->constrained('areas')->onDelete('set null');

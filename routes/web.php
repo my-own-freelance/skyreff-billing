@@ -8,6 +8,7 @@ use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
 use App\Http\Controllers\Dashboard\InvoiceController;
 use App\Http\Controllers\Dashboard\MemberController;
+use App\Http\Controllers\Dashboard\MutationController;
 use App\Http\Controllers\Dashboard\OwnerController;
 use App\Http\Controllers\Dashboard\PlanController;
 use App\Http\Controllers\Dashboard\SubscriptionController;
@@ -71,6 +72,11 @@ Route::group(['middleware' => 'auth:web'], function () {
             Route::get('/device', action: [DeviceController::class, 'index'])->name('device');
             Route::get('/faq', action: [DeviceFaqController::class, 'index'])->name('faq');
         });
+
+        // TRANSACTION
+        Route::group(['prefix' => 'transaction'], function () {
+            Route::get("/mutation", [MutationController::class, 'index'])->name('mutation');
+        });
     });
 
     // ADMIN AND MEMBER
@@ -84,6 +90,13 @@ Route::group(['middleware' => 'auth:web'], function () {
         Route::group(['prefix' => 'transaction'], function () {
             Route::get("/invoice", [InvoiceController::class, 'index'])->name('invoice');
             Route::get('/invoice/print/{id}', [InvoiceController::class, 'print'])->name('invoice.print');
+        });
+    });
+
+    // ONLY TEKNISI
+    Route::group(["middleware" => "web.check.role:teknisi"], function () {
+        Route::group(['prefix' => 'transaction'], function () {
+            Route::get("/commission/request-wd", [MutationController::class, "requestWithdraw"])->name("commission.request-wd");
         });
     });
 });

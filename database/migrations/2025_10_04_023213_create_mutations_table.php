@@ -15,13 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->integer('amount')->default(0);
-            $table->enum('type', ['C', 'W']); // C = commission . W = Widhraw
+            $table->enum('type', ['C', 'W', 'R']); // C = commission . W = Widhraw, R = Refund
             $table->integer('first_commission')->default(0);
             $table->integer('last_commission')->default(0);
             $table->enum('status', ['PENDING', 'PROCESS', 'SUCCESS', 'REJECT', 'CANCEL'])->default('PENDING');
             $table->string('bank_name')->nullable(); // untuk widhraw
             $table->string('bank_account')->nullable(); // untuk widhraw
             $table->string('proof_of_payment')->nullable(); // bukti bayar oleh admin jika tipe widhraw
+            $table->string("remark")->nullable(); // for reject reason
             $table->unsignedBigInteger('user_id'); // relasi ke tabel user role teknisi
             $table->timestamps();
         });

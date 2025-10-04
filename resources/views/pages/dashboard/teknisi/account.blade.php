@@ -46,6 +46,16 @@
                                 <input class="form-control" id="address" type="text" name="address"
                                     placeholder="masukan alamat" required />
                             </div>
+                            <div class="form-group form-group-default">
+                                <label>Nama Bank</label>
+                                <input type="text" class="form-control" id="bank_type" name="bank_type"
+                                    placeholder="nama Bank">
+                            </div>
+                            <div class="form-group form-group-default">
+                                <label>No Rekening</label>
+                                <input type="text" class="form-control" id="bank_account" name="bank_account"
+                                    placeholder="nomor rekening">
+                            </div>
                         </div>
                         <div class="text-right mt-3 mb-3">
                             <button class="btn btn-success" type="submit">Save</button>
@@ -79,6 +89,8 @@
             formData.append("phone", $("#phone").val());
             formData.append("password", $("#password").val());
             formData.append("address", $("#address").val());
+            formData.append("bank_type", $("#bank_type").val());
+            formData.append("bank_account", $("#bank_account").val());
 
             update(formData);
             return false;
@@ -94,6 +106,8 @@
                     $("#name").val(d.name);
                     $("#username").val(d.username);
                     $("#phone").val(d.phone);
+                    $("#bank_type").val(d.bank_type);
+                    $("#bank_account").val(d.bank_account);
 
                     $("#address").val(d.address);
 

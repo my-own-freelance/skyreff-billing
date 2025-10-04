@@ -57,7 +57,7 @@
                         <p>Device</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'device-faq' ? 'active' : '' }}">
+                <li class="nav-item ml-3 {{ $routename == 'faq' ? 'active' : '' }}">
                     <a href="{{ route('faq') }}">
                         <i class="fas fa-question-circle"></i> {{-- Device FAQ --}}
                         <p>Device FAQ</p>
@@ -119,6 +119,12 @@
                     <a href="{{ route('invoice') }}">
                         <i class="fas fa-file-invoice-dollar"></i> {{-- Invoice --}}
                         <p>Invoice</p>
+                    </a>
+                </li>
+                <li class="nav-item ml-3 {{ $routename == 'mutation' ? 'active' : '' }}"">
+                    <a href="{{ route('mutation') }}">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <p>Mutation</p>
                     </a>
                 </li>
 

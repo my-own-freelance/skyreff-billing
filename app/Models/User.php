@@ -32,6 +32,8 @@ class User extends Authenticatable
         'last_login_at',
         'is_active',
         'area_id',
+        'bank_type',
+        'bank_account'
     ];
 
     /**

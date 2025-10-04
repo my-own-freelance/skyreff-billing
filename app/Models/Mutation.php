@@ -22,6 +22,7 @@ class Mutation extends Model
         'status',
         'proof_of_payment',
         'user_id',
+        'remark',
     ];
 
     /**
