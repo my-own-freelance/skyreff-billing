@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -243,7 +244,28 @@ class TicketController extends Controller
 
             unset($data['id']); // prevent injected id
 
-            Ticket::create($data);
+            $ticket = Ticket::create($data);
+
+            // 🔔 Kirim notifikasi WA ke teknisi jika ada technician_id
+            if (!empty($data['technician_id'])) {
+                $technician = User::find($data['technician_id']);
+                if ($technician) {
+                    $message = "Halo {$technician->name},\n";
+                    $message .= "Anda memiliki tiket baru:\n";
+                    $message .= "Tipe: {$ticket->type}\n";
+                    $message .= "Kasus/Tiket: {$ticket->cases}\n";
+                    $message .= "Silakan segera follow up.\nTerima kasih.";
+
+                    $payload = [
+                        "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
+                        "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
+                        "to" => preg_replace('/^08/', '628', $technician->phone),
+                        "message" => $message,
+                    ];
+
+                    Http::post('https://app.saungwa.com/api/create-message', $payload);
+                }
+            }
 
             return response()->json([
                 'status' => 'success',

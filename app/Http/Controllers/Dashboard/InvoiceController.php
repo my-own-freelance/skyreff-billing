@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 class InvoiceController extends Controller
@@ -62,7 +64,7 @@ class InvoiceController extends Controller
                     <a class='dropdown-item' onclick='return printInvoice(\"{$item->id}\");' href='javascript:void(0);' title='Print Invoice'>Print</a>";
 
                 // Jika status belum paid, tampilkan opsi update status
-                if ($item->status !== 'paid') {
+                if ($item->status !== 'paid' && $item->status != "cancel") {
                     $action .= "
                     <a class='dropdown-item' onclick='return updateStatus(\"{$item->id}\", \"paid\");' href='javascript:void(0);' title='Sukseskan'>Sukses</a>
                     <a class='dropdown-item' onclick='return updateStatus(\"{$item->id}\", \"cancel\");' href='javascript:void(0);' title='Batalkan'>Cancel</a>";
@@ -202,7 +204,7 @@ class InvoiceController extends Controller
                 ], 400);
             }
 
-            $invoice = Invoice::find($data['id']);
+            $invoice = Invoice::with("plan")->find($data['id']);
             if (!$invoice) {
                 return response()->json([
                     'status' => 'error',
@@ -239,6 +241,37 @@ class InvoiceController extends Controller
             }
 
             $invoice->update($updateData);
+
+            // 🔔 Kirim notifikasi WA ke member
+            if ($data['status'] === 'paid') {
+                $member = User::where('id', $invoice->user_id)->first();
+                $invoiceNumber = $invoice->invoice_number ?? $invoice->id;
+                $amount = number_format($invoice->amount ?? 0, 0, ',', '.');
+                $periodStart = $invoice->invoice_period_start ? Carbon::parse($invoice->invoice_period_start)
+                    ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                    ->locale('id') // bahasa Indonesia
+                    ->translatedFormat('d M Y') : '-';
+                $periodEnd = $invoice->invoice_period_end ? Carbon::parse($invoice->invoice_period_end)
+                    ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                    ->locale('id') // bahasa Indonesia
+                    ->translatedFormat('d M Y') : '-';
+                $plan = $invoice->plan;
+
+                $message = "Halo {$member->name},\n";
+                $message .= "Invoice Anda dengan nomor: {$invoiceNumber} telah *dibayar*.\n";
+                $message .= "Jumlah: Rp {$amount}\n";
+                $message .= "Paket : {$plan->name}\n";
+                $message .= "Periode: {$periodStart} s/d {$periodEnd}\n";
+                $message .= "Terima kasih telah melakukan pembayaran tepat waktu.";
+
+                $payload = [
+                    "appkey"   => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
+                    "authkey"  => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
+                    "to"       => preg_replace('/^08/', '628', $member->phone),
+                    "message"  => $message
+                ];
+                Http::post('https://app.saungwa.com/api/create-message', $payload);
+            }
 
             DB::commit();
             return response()->json([

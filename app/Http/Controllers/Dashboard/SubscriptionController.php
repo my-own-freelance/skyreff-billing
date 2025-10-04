@@ -13,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -274,10 +275,38 @@ class SubscriptionController extends Controller
 
                 $ticket = Ticket::create($ticketData);
 
-                // --- next development: kirim notifikasi WA ke teknisi jika create_pic_notif == 'ya'
-                // if(!empty($data['create_pic_notif']) && $data['create_pic_notif'] == 'ya'){
-                //     // logic kirim notifikasi WA ke teknisi
-                // }
+                // 🔔 Kirim notifikasi WA ke teknisi jika create_pic_notif == 'ya'
+                if (!empty($data['create_pic_notif']) && $data['create_pic_notif'] == 'ya' && !empty($data['technician_id'])) {
+                    $technician = User::find($data['technician_id']);
+                    $member = User::find($data['user_id']);
+                    $plan = Plan::find($data['plan_id']);
+
+                    if ($technician && $member) {
+                        // link google maps dari latitude/longitude atau alamat
+                        $linkMap = $member->link_maps;
+
+                        $message = "Halo {$technician->name},\n";
+                        $message .= "Terdapat tiket pemasangan baru yang harus Anda tangani.\n\n";
+                        $message .= "Member: {$member->name}\n";
+                        $message .= "Phone: {$member->phone}\n";
+                        $message .= "Alamat: {$member->address}\n";
+                        if ($linkMap) {
+                            $message .= "Lokasi: {$linkMap}\n";
+                        }
+                        $message .= "Paket : {$plan->name}\n";
+                        $message .= "Subscription: {$subscription->subscription_number}\n";
+                        $message .= "Silakan segera lakukan follow up pemasangan.\nTerima kasih.";
+
+                        $payload = [
+                            "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
+                            "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
+                            "to" => preg_replace('/^08/', '628', $technician->phone),
+                            "message" => $message,
+                        ];
+
+                        Http::post('https://app.saungwa.com/api/create-message', $payload);
+                    }
+                }
             }
 
             DB::commit();
@@ -502,6 +531,33 @@ class SubscriptionController extends Controller
             $subscription->save();
 
             DB::commit();
+
+            // 🔔 Kirim notifikasi WA ke member
+            $member = $subscription->user;
+            $message = "Halo {$member->name},\n";
+            $message .= "Invoice baru telah dibuat untuk subscription Anda.\n";
+            $message .= "Nomor Invoice: {$invoiceNumber}\n";
+            $message .= "Jumlah: Rp " . number_format($amount, 0, ',', '.') . "\n";
+            $message .= "Paket : {$subscription->plan->name}\n";
+            $message .= "Periode: " . Carbon::parse($invoice->invoice_period_start)
+                ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                ->locale('id') // bahasa Indonesia
+                ->translatedFormat('d M Y')
+                . " s/d " . Carbon::parse($invoice->invoice_period_end)
+                ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                ->locale('id') // bahasa Indonesia
+                ->translatedFormat('d M Y') . "\n";
+            $message .= "Jatuh tempo: " . Carbon::parse($dueDate)->format('d M Y') . "\n";
+            $message .= "Silakan lakukan pembayaran tepat waktu. Terima kasih.";
+
+            $payload = [
+                "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
+                "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
+                "to" => preg_replace('/^08/', '628', $member->phone),
+                "message" => $message,
+            ];
+
+            Http::post('https://app.saungwa.com/api/create-message', $payload);
 
             return response()->json([
                 'status' => 'success',
