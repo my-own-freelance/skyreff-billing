@@ -40,6 +40,20 @@ Route::group(['middleware' => 'check.auth'], function () {
     Route::get("/account/detail", [UserController::class, "getDetailAccount"])->name("user.detail-account");
     Route::post("/account/update", [UserController::class, "updateAccountReseller"])->name("user.update-account");
 
+    Route::group(['prefix' => 'manage'], function () {
+        // TICKET
+        Route::group(['prefix' => 'ticket'], function () {
+            Route::get('datatable', [TicketController::class, 'dataTable'])->name('ticket.datatable');
+            Route::get('{id}/detail', [TicketController::class, 'getDetail'])->name('ticket.detail');
+            Route::post('create', [TicketController::class, 'create'])->name('ticket.create');
+            Route::post('update', [TicketController::class, 'update'])->name('ticket.update');
+            Route::post('claim', [TicketController::class, 'claim'])->name('ticket.claim');
+            Route::post("process", [TicketController::class, "updateProgress"])->name("ticket.process");
+            Route::post('update-status', [TicketController::class, 'updateStatus'])->name('ticket.change-status');
+            Route::delete('delete', [TicketController::class, 'destroy'])->name('ticket.destroy');
+        });
+    });
+
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'api.check.role:admin'], function () {
         Route::get("/statistic-chart", [DashboardController::class, "getStatisticChart"])->name("statistic-chart");
@@ -122,16 +136,6 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update', [AnnountcementController::class, 'update'])->name('announcement.update');
                 Route::post('update-status', [AnnountcementController::class, 'updateStatus'])->name('announcement.change-status');
                 Route::delete('delete', [AnnountcementController::class, 'destroy'])->name('announcement.destroy');
-            });
-
-            // TICKET
-            Route::group(['prefix' => 'ticket'], function () {
-                Route::get('datatable', [TicketController::class, 'dataTable'])->name('ticket.datatable');
-                Route::get('{id}/detail', [TicketController::class, 'getDetail'])->name('ticket.detail');
-                Route::post('create', [TicketController::class, 'create'])->name('ticket.create');
-                Route::post('update', [TicketController::class, 'update'])->name('ticket.update');
-                Route::post('update-status', [TicketController::class, 'updateStatus'])->name('ticket.change-status');
-                Route::delete('delete', [TicketController::class, 'destroy'])->name('ticket.destroy');
             });
         });
     });

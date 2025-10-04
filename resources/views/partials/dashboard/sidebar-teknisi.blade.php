@@ -37,10 +37,28 @@
                         <p>Device FAQ</p>
                     </a>
                 </li>
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">TRANSACTION</h4>
+                </li>
                 <li class="nav-item ml-3 {{ $routename == 'mutation' ? 'active' : '' }}"">
                     <a href="{{ route('mutation') }}">
                         <i class="fas fa-money-bill-wave"></i>
                         <p>Mutation</p>
+                    </a>
+                </li>
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">WORK</h4>
+                </li>
+                <li class="nav-item ml-3 {{ $routename == 'ticket' ? 'active' : '' }}">
+                    <a href="{{ route('ticket') }}">
+                        <i class="fas fa-ticket-alt"></i> {{-- Ticket --}}
+                        <p>Ticket</p>
                     </a>
                 </li>
                 {{-- <li class="nav-section">

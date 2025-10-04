@@ -357,7 +357,7 @@
                 }
             });
         });
-        
+
         // reset form otomatis setiap kali modal ditutup manual
         $("#modalSetCommission").on("hidden.bs.modal", function() {
             $("#formSetCommission")[0].reset();

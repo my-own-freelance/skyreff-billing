@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth:web'], function () {
     Route::get('/teknisi', [DashboardController::class, 'index'])->name('dashboard.teknisi');
     Route::get('/member', [DashboardController::class, 'index'])->name('dashboard.member');
     Route::get("/account", [UserController::class, "account"])->name("user.account");
+    Route::get('/manage/ticket', [TicketController::class, 'index'])->name('ticket');
 
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'web.check.role:admin'], function () {
@@ -62,7 +63,6 @@ Route::group(['middleware' => 'auth:web'], function () {
         // PREFIX MANAGE
         Route::group(['prefix' => 'manage'], function () {
             Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
-            Route::get('/ticket', [TicketController::class, 'index'])->name('ticket');
         });
     });
     // ADMIN AND TEKNISI

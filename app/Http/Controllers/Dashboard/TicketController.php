@@ -16,9 +16,20 @@ class TicketController extends Controller
     public function index()
     {
         $title = 'Manajemen Tiket';
-        $members = User::where('role', 'member')->get();
-        $technicians = User::where('role', 'teknisi')->get();
-        return view('pages.dashboard.admin.ticket', compact('title', 'members', 'technicians'));
+        $technicians = [];
+        $members = [];
+        $user = auth()->user();
+        if ($user->role == "admin") {
+            $pageUrl = "pages.dashboard.admin.ticket";
+            $members = User::where('role', 'member')->get();
+            $technicians = User::where('role', 'teknisi')->get();
+        } else if ($user->role == "teknisi") {
+            $pageUrl = "pages.dashboard.teknisi.ticket";
+            $members = User::where('role', 'member')->get();
+        } else {
+            $pageUrl = "pages.dashboard.member.ticket";
+        }
+        return view($pageUrl, compact('title', 'members', 'technicians'));
     }
 
     // DATA TABLE
@@ -32,12 +43,12 @@ class TicketController extends Controller
             // 🔹 Filter role
             if ($user->role === 'member') {
                 $query->where('member_id', $user->id);
-            } elseif ($user->role === 'technician') {
+            } elseif ($user->role === 'teknisi') {
                 $query->where(function ($q) use ($user) {
-                    $q->where('technician_id', $user->id)->orWhereNull('technician_id');
+                    $q->where('technician_id', $user->id)
+                        ->orWhereNull('technician_id'); // hanya ini dan milik dia
                 });
             }
-
             if ($request->query('search')) {
                 $searchValue = $request->query('search')['value'];
                 $query->where(function ($query) use ($searchValue) {
@@ -45,20 +56,49 @@ class TicketController extends Controller
                 });
             }
 
+            // filter teknisi dari dashboard admin
+            if ($request->query('technician_id') && $request->query('technician_id') != '') {
+                $query->where('technician_id', strtoupper($request->query('technician_id')));
+            }
+
+            // filter member dari dashboard admin
+            if ($request->query('member_id') && $request->query('member_id') != '') {
+                $query->where('member_id', strtoupper($request->query('member_id')));
+            }
+
             $recordsFiltered = $query->count();
             $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
 
-            $output = $data->map(function ($item) {
-                $action = "<div class='dropdown-primary dropdown open'>
-                            <button class='btn btn-sm btn-primary dropdown-toggle' id='dropdown-{$item->id}' data-toggle='dropdown'>
-                                Aksi
-                            </button>
-                            <div class='dropdown-menu'>
-                                <a class='dropdown-item' onclick='return showDetail(\"{$item->id}\");'>Detail</a>
-                                <a class='dropdown-item' onclick='return getData(\"{$item->id}\");'>Edit</a>
-                                <a class='dropdown-item' onclick='return removeData(\"{$item->id}\");'>Hapus</a>
-                            </div>
-                        </div>";
+            $output = $data->map(function ($item) use ($user) {
+                $action = "";
+                if ($user->role == "admin") {
+                    $action = "<div class='dropdown-primary dropdown open'>
+                                <button class='btn btn-sm btn-primary dropdown-toggle' id='dropdown-{$item->id}' data-toggle='dropdown'>
+                                    Aksi
+                                </button>
+                                <div class='dropdown-menu'>
+                                    <a class='dropdown-item' onclick='return showDetail(\"{$item->id}\");'>Detail</a>
+                                    <a class='dropdown-item' onclick='return getData(\"{$item->id}\");'>Edit</a>
+                                    <a class='dropdown-item' onclick='return removeData(\"{$item->id}\");'>Hapus</a>
+                                </div>
+                            </div>";
+                } else if ($user->role == "member") {
+                } else if ($user->role == "teknisi") {
+                    $claimTicket = $item->technician_id == null && $item->status == "open" ?  "<a class='dropdown-item' onclick='return claimTicket(\"{$item->id}\");'>Klaim Tiket</a>" : '';
+                    // Tombol Process (buka modal update progress)
+                    $processTicket = $item->status != "success" ? "<a class='dropdown-item' onclick='return openUpdateProgress(\"{$item->id}\", \"{$item->status}\", `" . addslashes($item->solution ?? '') . "`);'>Process</a>" : "";
+
+                    $action = "<div class='dropdown-primary dropdown open'>
+                                <button class='btn btn-sm btn-primary dropdown-toggle' id='dropdown-{$item->id}' data-toggle='dropdown'>
+                                    Aksi
+                                </button>
+                                <div class='dropdown-menu'>
+                                    <a class='dropdown-item' onclick='return showDetail(\"{$item->id}\");'>Detail</a>
+                                    " . $processTicket . "
+                                    " . $claimTicket . "
+                                </div>
+                            </div>";
+                }
 
                 $statusClass = match ($item->status) {
                     'open' => 'badge badge-secondary',
@@ -85,12 +125,23 @@ class TicketController extends Controller
                 return $item;
             });
 
-            $total = Ticket::count();
+
+            $queryTotal = Ticket::query();
+            if ($user->role === "member") {
+                $queryTotal->where('member_id', $user->id);
+            } elseif ($user->role === "teknisi") {
+                $queryTotal->where(function ($q) use ($user) {
+                    $q->where('technician_id', $user->id)
+                        ->orWhereNull('technician_id');
+                });
+            }
+            $total = $queryTotal->count();
             return response()->json([
                 'draw' => $request->query('draw'),
                 'recordsFiltered' => $recordsFiltered,
                 'recordsTotal' => $total,
                 'data' => $output,
+                'query' => $request->query('technician_id')
             ]);
         } catch (\Throwable $err) {
             return response()->json(
@@ -272,18 +323,21 @@ class TicketController extends Controller
     }
 
     // Teknisi claim tiket
-    public function claim(Request $request, $id)
+    public function claim(Request $request)
     {
         try {
+            $id = $request->id;
             $ticket = Ticket::find($id);
             if (!$ticket) {
                 return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
             }
             if ($ticket->technician_id) {
-                return response()->json(['status' => 'error', 'message' => 'Tiket sudah di-claim'], 400);
+                return response()->json(['status' => 'error', 'message' => 'Tiket sudah pernah di-claim'], 400);
             }
 
-            $ticket->update(['technician_id' => auth()->id(), 'status' => 'inprogress']);
+            $ticket['technician_id'] = auth()->id();
+            $ticket['status'] = 'inprogress';
+            $ticket->save();
 
             return response()->json(['status' => 'success', 'message' => 'Tiket berhasil di-claim']);
         } catch (\Exception $err) {
@@ -298,20 +352,37 @@ class TicketController extends Controller
     }
 
     // Update progress (teknisi/admin)
-    public function updateProgress(Request $request, $id)
+    public function updateProgress(Request $request)
     {
         try {
+            $data = $request->all();
             $rules = [
+                'ticket_id' => 'required|integer|exists:tickets,id',
                 'status' => 'required|in:inprogress,success,reject,failed',
                 'solution' => 'nullable|string',
                 'completion_image' => 'nullable|image|max:2048|mimes:jpeg,jpg,png',
             ];
-            $validator = Validator::make($request->all(), $rules);
+
+            if ($request->file('completion_image')) {
+                $rules['completion_image'] .= '|image|max:2048|mimes:jpeg,jpg,png';
+            }
+
+            $messages = [
+                'ticket_id.required' => 'ID tiket harus diisi',
+                'ticket_id.integer' => 'ID tiket tidak valid',
+                'ticket_id.exists' => 'Tiket tidak ditemukan',
+                'status.in' => 'Status tiket tidak valid',
+                'subscription_id.exists' => 'Subscription tidak ditemukan',
+                'completion_image.image' => 'Gambar tidak valid',
+                'completion_image.max' => 'Ukuran gambar maksimal 2MB',
+                'completion_image.mimes' => 'Format gambar harus jpeg/jpg/png',
+            ];
+            $validator = Validator::make($data, $rules, $messages);
             if ($validator->fails()) {
                 return response()->json(['status' => 'error', 'message' => $validator->errors()->first()], 400);
             }
 
-            $ticket = Ticket::find($id);
+            $ticket = Ticket::find($data["ticket_id"]);
             if (!$ticket) {
                 return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
             }

@@ -59,7 +59,7 @@ class MutationController extends Controller
                 $query->where('code', 'like', '%' . $searchValue . '%');
             }
 
-            // filter reseller dari dashboard admin
+            // filter teknisi dari dashboard admin
             if ($request->query('user_id') && $request->query('user_id') != '') {
                 $query->where('user_id', strtoupper($request->query('user_id')));
             }

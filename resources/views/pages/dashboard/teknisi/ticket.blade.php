@@ -14,10 +14,10 @@
                     </div>
                     <div class="card-header-right">
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
-                        <button class="btn btn-mini btn-primary" onclick="return addData();">Tambah Ticket</button>
                     </div>
                     <form class="navbar-left navbar-form mr-md-1 mt-3" id="formFilter">
                         <div class="row">
+
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label for="fMember">Filter Member</label>
@@ -26,19 +26,6 @@
                                         @foreach ($members as $member)
                                             <option value="{{ $member->id }}">({{ $member->username }})
                                                 {{ $member->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="fTechnician">Filter Teknisi</label>
-                                    <select class="form-control" id="fTechnician" name="fTechnician">
-                                        <option value="">All</option>
-                                        @foreach ($technicians as $teknisi)
-                                            <option value="{{ $teknisi->id }}">({{ $teknisi->username }})
-                                                {{ $teknisi->name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -76,96 +63,11 @@
                 </div>
             </div>
         </div>
-
-        {{-- FORM CREATE / EDIT --}}
-        <div class="col-md-5 col-sm-12" style="display: none" data-action="update" id="formEditable">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <h5>Tambah / Edit Ticket</h5>
-                    </div>
-                    <div class="card-header-right">
-                        <button class="btn btn-sm btn-warning" onclick="return closeForm(this)" id="btnCloseForm">
-                            <i class="ion-android-close"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-block">
-                    <form enctype="multipart/form-data">
-                        <input type="hidden" name="id" id="id">
-
-                        <div class="form-group">
-                            <label for="type">Type Ticket</label>
-                            <select class="form-control" name="type" id="type" required>
-                                <option value="">Pilih Type</option>
-                                <option value="gangguan">Gangguan</option>
-                                <option value="maintenance">Maintenance</option>
-                                <option value="pemasangan">Pemasangan</option>
-                                <option value="troubleshoot">Troubleshoot</option>
-                                <option value="lain-lain">Lain-lain</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="status">Status Ticket</label>
-                            <select class="form-control" name="status" id="status" required>
-                                <option value="open">Open</option>
-                                <option value="inprogress">In Progress</option>
-                                <option value="success">Success</option>
-                                <option value="reject">Reject</option>
-                                <option value="failed">Failed</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="member_id">Assign Member</label>
-                            <select class="form-control" name="member_id" id="member_id">
-                                <option value="">-- Optional --</option>
-                                @foreach ($members as $m)
-                                    <option value="{{ $m->id }}">{{ $m->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="technician_id">Assign Technician</label>
-                            <select class="form-control" name="technician_id" id="technician_id">
-                                <option value="">-- Optional --</option>
-                                @foreach ($technicians as $t)
-                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="cases">Cases</label>
-                            <textarea class="form-control" name="cases" id="cases" rows="3"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="complaint_image">Complaint Image</label>
-                            <input type="file" class="form-control" id="complaint_image" name="complaint_image">
-                            <small class="text-danger">Max 2MB</small>
-                        </div>
-
-                        <div class="form-group">
-                            <button class="btn btn-sm btn-primary" type="submit" id="submit">
-                                <i class="ti-save"></i> Simpan
-                            </button>
-                            <button class="btn btn-sm btn-default" type="reset" id="reset"
-                                style="margin-left:10px;">
-                                Reset
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- MODAL DETAIL -->
-    <div class="modal fade" id="ticketDetailModal" tabindex="-1" role="dialog"
-        aria-labelledby="ticketDetailModalLabel" aria-hidden="true">
+    <div class="modal fade" id="ticketDetailModal" tabindex="-1" role="dialog" aria-labelledby="ticketDetailModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -214,6 +116,56 @@
         </div>
     </div>
 
+    <!-- Modal Update Progress -->
+    <div class="modal fade" id="modalUpdateProgress" tabindex="-1" role="dialog"
+        aria-labelledby="modalUpdateProgressLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="formUpdateProgress" enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="ticket_id" id="ticket_id" value="">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalUpdateProgressLabel">Update Progress Tiket</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Status -->
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select class="form-control" name="status" id="status" required>
+                                <option value="inprogress">In Progress</option>
+                                <option value="success">Success</option>
+                                <option value="reject">Reject</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+
+                        <!-- Solution -->
+                        <div class="form-group">
+                            <label for="solution">Solusi Penyelesaian</label>
+                            <textarea class="form-control" name="solution" id="solution" rows="4"></textarea>
+                        </div>
+
+                        <!-- Completion Image -->
+                        <div class="form-group" id="completionImageWrapper" style="display:none;">
+                            <label for="completion_image">Upload Gambar Completion</label>
+                            <input type="file" class="form-control" name="completion_image" id="completion_image"
+                                accept="image/*">
+                            <small class="form-text text-muted">Hanya jika status sukses. Max 2MB.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Update Progress</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
 @endsection
 
 @push('scripts')
@@ -228,6 +180,7 @@
         function dataTable(filter) {
             let url = "{{ route('ticket.datatable') }}";
             if (filter) url += "?" + filter;
+
             dTable = $("#ticketDataTable").DataTable({
                 searching: true,
                 ordering: true,
@@ -269,10 +222,8 @@
         $('#formFilter').submit(function(e) {
             e.preventDefault()
             let dataFilter = {
-                member_id: $("#fMember").val(),
-                technician_id: $("#fTechnician").val()
+                member_id: $("#fMember").val()
             }
-            console.log("filter :", dataFilter);
 
             dTable.clear();
             dTable.destroy();
@@ -280,49 +231,7 @@
             return false
         })
 
-        function addData() {
-            $("#formEditable").attr('data-action', 'add').fadeIn(200);
-            $("#boxTable").removeClass("col-md-12").addClass("col-md-7");
-            $("#id").val('');
-            $("#type").val('').change();
-            $("#status").val('open').change();
-            $("#member_id").val('').change();
-            $("#technician_id").val('').change();
-            $("#cases").val('');
-            $("#complaint_image").val('');
-        }
 
-        function closeForm() {
-            $("#formEditable").slideUp(200, function() {
-                $("#boxTable").removeClass("col-md-7").addClass("col-md-12");
-                $("#reset").click();
-            })
-        }
-
-        $("#formEditable form").submit(function(e) {
-            e.preventDefault();
-            let formData = new FormData(this);
-            saveData(formData, $("#formEditable").attr("data-action"));
-        });
-
-        function saveData(data, action) {
-            $.ajax({
-                url: action == "update" ? "{{ route('ticket.update') }}" : "{{ route('ticket.create') }}",
-                contentType: false,
-                processData: false,
-                method: "POST",
-                data: data,
-                success: function(res) {
-                    closeForm();
-                    showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
-                    refreshData();
-                },
-                error: function(err) {
-                    showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
-                        ?.message);
-                }
-            })
-        }
 
         function getData(id) {
             $.ajax({
@@ -345,27 +254,6 @@
                         ?.message);
                 }
             })
-        }
-
-        function removeData(id) {
-            let c = confirm("Apakah anda yakin untuk menghapus data ini ?");
-            if (c) {
-                $.ajax({
-                    url: "{{ route('ticket.destroy') }}",
-                    method: "DELETE",
-                    data: {
-                        id: id
-                    },
-                    success: function(res) {
-                        refreshData();
-                        showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
-                    },
-                    error: function(err) {
-                        showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
-                            ?.message);
-                    }
-                })
-            }
         }
 
         function showDetail(id) {
@@ -423,5 +311,81 @@
                 }
             })
         }
+
+
+        function claimTicket(id) {
+            let c = confirm("Apakah anda yakin untuk mengambil ticket ini ?");
+            if (c) {
+                $.ajax({
+                    url: "{{ route('ticket.claim') }}",
+                    method: "POST",
+                    data: {
+                        id: id
+                    },
+                    success: function(res) {
+                        refreshData();
+                        showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
+                    },
+                    error: function(err) {
+                        showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
+                            ?.message);
+                    }
+                })
+            }
+        }
+
+
+
+        // buka modal
+        function openUpdateProgress(ticketId, currentStatus = 'inprogress', currentSolution = '') {
+            currentTicketId = ticketId;
+            $("#ticket_id").val(ticketId);
+            $("#status").val(currentStatus);
+            $("#solution").val(currentSolution);
+            $("#completion_image").val('');
+
+            // tampilkan field image jika status 'success'
+            $("#completionImageWrapper").toggle(currentStatus === 'success');
+
+            $("#modalUpdateProgress").modal("show");
+        }
+
+        // toggle input image saat status berubah
+        $("#status").on("change", function() {
+            $("#completionImageWrapper").toggle($(this).val() === 'success');
+        });
+
+        // submit form via AJAX
+        $("#formUpdateProgress").on("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "{{ route('ticket.process') }}",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(res) {
+                    if (res.status === "success") {
+                        refreshData();
+                        showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
+
+                        $("#modalUpdateProgress").modal("hide");
+                        $("#formUpdateProgress")[0].reset();
+                        $('#datatable').DataTable().ajax.reload(null, false);
+                    } else {
+                        showMessage("danger", "flaticon-error", "Peringatan", err.message || err
+                            .responseJSON
+                            ?.message);
+                    }
+                },
+                error: function(err) {
+                    showMessage("danger", "flaticon-error", "Peringatan", err.message || err
+                        .responseJSON
+                        ?.message);
+                }
+            });
+        });
     </script>
 @endpush
