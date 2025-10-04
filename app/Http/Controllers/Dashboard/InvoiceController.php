@@ -110,6 +110,12 @@ class InvoiceController extends Controller
                     ->locale('id') // bahasa Indonesia
                     ->translatedFormat('d M Y H:i')
                     : '-';
+
+                $item['due_date_formatted'] =  Carbon::parse($item->due_date)
+                    ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                    ->locale('id') // bahasa Indonesia
+                    ->translatedFormat('d M Y H:i');
+
                 $item['paid_at_formatted'] = $item->paid_at
                     ? Carbon::parse($item->paid_at)
                     // ->timezone('Asia/Jakarta') // atur timezone ke WIB

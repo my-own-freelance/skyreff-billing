@@ -141,9 +141,23 @@ class SubscriptionController extends Controller
                     . '<span><b>Username:</b> ' . e($item->user->username) . '</span>'
                     : '-';
                 $item['current_period'] = $item->current_period_start && $item->current_period_end
-                    ? $item->current_period_start->format('Y-m-d') . ' s/d ' . $item->current_period_end->format('Y-m-d')
+                    ? Carbon::parse($item->current_period_start)
+                    ->timezone('Asia/Jakarta')
+                    ->locale('id')
+                    ->translatedFormat('d M Y H:i')
+                    . ' s/d ' .
+                    Carbon::parse($item->current_period_end)
+                    ->timezone('Asia/Jakarta')
+                    ->locale('id')
+                    ->translatedFormat('d M Y H:i')
                     : '-';
-                $item['next_invoice'] = $item->next_invoice_at ? $item->next_invoice_at->format('Y-m-d H:i') : '-';
+
+                $item['next_invoice'] = $item->next_invoice_at
+                    ? Carbon::parse($item->next_invoice_at)
+                    ->timezone('Asia/Jakarta')
+                    ->locale('id')
+                    ->translatedFormat('d M Y H:i')
+                    : '-';
 
                 return $item;
             });
@@ -534,12 +548,12 @@ class SubscriptionController extends Controller
 
             // 🔔 Kirim notifikasi WA ke member
             $member = $subscription->user;
-            $message = "Halo {$member->name},\n";
-            $message .= "Invoice baru telah dibuat untuk subscription Anda.\n";
-            $message .= "Nomor Invoice: {$invoiceNumber}\n";
-            $message .= "Jumlah: Rp " . number_format($amount, 0, ',', '.') . "\n";
-            $message .= "Paket : {$subscription->plan->name}\n";
-            $message .= "Periode: " . Carbon::parse($invoice->invoice_period_start)
+            $message = "Halo {$member->name},\n\n";
+            $message .= "Invoice baru telah terbit untuk subscription Anda.\n\n";
+            $message .= "*Nomor Invoice:* {$invoiceNumber}\n";
+            $message .= "*Jumlah:* Rp " . number_format($amount, 0, ',', '.') . "\n";
+            $message .= "*Paket :* {$subscription->plan->name}\n";
+            $message .= "*Periode:* " . Carbon::parse($invoice->invoice_period_start)
                 ->timezone('Asia/Jakarta') // atur timezone ke WIB
                 ->locale('id') // bahasa Indonesia
                 ->translatedFormat('d M Y')
@@ -547,7 +561,10 @@ class SubscriptionController extends Controller
                 ->timezone('Asia/Jakarta') // atur timezone ke WIB
                 ->locale('id') // bahasa Indonesia
                 ->translatedFormat('d M Y') . "\n";
-            $message .= "Jatuh tempo: " . Carbon::parse($dueDate)->format('d M Y') . "\n";
+            $message .= "*Jatuh tempo:* " . Carbon::parse($invoice->due_date)
+                ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                ->locale('id') // bahasa Indonesia
+                ->translatedFormat('d M Y') . "\n\n";
             $message .= "Silakan lakukan pembayaran tepat waktu. Terima kasih.";
 
             $payload = [

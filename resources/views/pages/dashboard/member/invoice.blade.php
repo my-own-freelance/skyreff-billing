@@ -30,17 +30,17 @@
                                     <th class="all">Invoice Date</th>
                                     <th class="all">Invoice Number</th>
                                     <th class="all">Subscription Number</th>
-                                    <th class="all">User</th>
                                     <th class="all">Plan</th>
                                     <th class="all">Amount</th>
                                     <th class="all">Invoice Period</th>
                                     <th class="all">Status</th>
+                                    <th class="all">Expired Date</th>
                                     <th class="all">Payment Date</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="10" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan="11" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -88,9 +88,6 @@
                         data: "subscription_number"
                     },
                     {
-                        data: "user_name"
-                    },
-                    {
                         data: "plan_name"
                     },
                     {
@@ -101,6 +98,9 @@
                     },
                     {
                         data: "status"
+                    },
+                    {
+                        data: "due_date_formatted"
                     },
                     {
                         data: "paid_at_formatted"

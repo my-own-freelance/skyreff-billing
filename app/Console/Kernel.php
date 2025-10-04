@@ -12,13 +12,23 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // // $schedule->command('inspire')->hourly();
 
-        // Generate invoice setiap awal bulan
-        $schedule->command('billing:generate-invoices')->monthlyOn(1, '00:00');
+        // // Generate invoice setiap awal bulan
+        // $schedule->command('billing:generate-invoices')->monthlyOn(1, '00:00');
 
-        // Cek expired invoice tiap hari jam 1 pagi
-        $schedule->command('billing:check-expired-invoices')->dailyAt('01:00');
+        // // Cek expired invoice tiap hari jam 1 pagi
+        // $schedule->command('billing:check-expired-invoices')->dailyAt('01:00');
+
+        if (app()->environment('production')) {
+            // Production: jalan tiap 3 jam sekali
+            $schedule->command('invoices:generate')->cron('0 */3 * * *');
+            $schedule->command('invoice:check-expired')->cron('0 */3 * * *');
+        } else {
+            // Development: jalan tiap 1 menit
+            $schedule->command('invoices:generate')->everyMinute();
+            $schedule->command('invoice:check-expired')->everyMinute();
+        }
     }
 
     /**
