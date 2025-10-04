@@ -89,8 +89,8 @@
                         <p>Ticket</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
-                    <a href="#">
+                <li class="nav-item ml-3  {{ $routename == 'broadcast' ? 'active' : '' }}">
+                    <a href="{{ route('broadcast') }}">
                         <i class="fas fa-bullhorn"></i> {{-- Broadcast --}}
                         <p>Broadcast</p>
                     </a>

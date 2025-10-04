@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
+use App\Http\Controllers\Dashboard\BroadcastController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
@@ -65,6 +66,7 @@ Route::group(['middleware' => 'auth:web'], function () {
         // PREFIX MANAGE
         Route::group(['prefix' => 'manage'], function () {
             Route::get('/announcement', [AnnountcementController::class, 'index'])->name('announcement');
+            Route::get('/broadcast', [BroadcastController::class, 'index'])->name('broadcast');
         });
     });
     // ADMIN AND TEKNISI

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
+use App\Http\Controllers\Dashboard\BroadcastController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
@@ -138,6 +139,8 @@ Route::group(['middleware' => 'check.auth'], function () {
                 Route::post('update-status', [AnnountcementController::class, 'updateStatus'])->name('announcement.change-status');
                 Route::delete('delete', [AnnountcementController::class, 'destroy'])->name('announcement.destroy');
             });
+
+            Route::post('/broadcast/whatsapp-send', [BroadcastController::class, 'send'])->name('broadcast.send');
         });
     });
 
