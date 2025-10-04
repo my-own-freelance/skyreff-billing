@@ -40,19 +40,23 @@
                                         <option value="{{ $area->id }}">{{ $area->name }}</option>
                                     @endforeach
                                 </select>
+                                <small class="form-text text-muted">Hanya member aktif pada area yg dipilih yg akan
+                                    mendapatkan pesan broadcast</small>
                             </div>
 
                             <!-- Member Select -->
                             <div class="form-group d-none" id="memberInput">
                                 <label for="member_ids">Filter Member</label>
                                 <div class="select2-input">
-                                    <select class="form-control" id="member_ids" name="member_ids[]"  multiple="multiple">
+                                    <select class="form-control" id="member_ids" name="member_ids[]" multiple="multiple">
                                         <option value="all">All</option>
                                         @foreach ($members as $member)
                                             <option value="{{ $member->id }}">{{ $member->name }} - {{ $member->phone }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="form-text text-muted">Hanya member aktif yg akan mendapatkan pesan
+                                        broadcast</small>
                                 </div>
                             </div>
 
