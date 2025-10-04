@@ -46,6 +46,8 @@ Route::group(['middleware' => 'auth:web'], function () {
     Route::get('/member', [DashboardController::class, 'index'])->name('dashboard.member');
     Route::get("/account", [UserController::class, "account"])->name("user.account");
     Route::get('/manage/ticket', [TicketController::class, 'index'])->name('ticket');
+    Route::get('/master/device', action: [DeviceController::class, 'index'])->name('device');
+    Route::get("/master/device/{id}/spesific", [DeviceController::class, "getDetailSpesific"])->name("device.detail-spesific");
 
     // ONLY ADMIN ACCESS
     Route::group(['middleware' => 'web.check.role:admin'], function () {
@@ -69,7 +71,6 @@ Route::group(['middleware' => 'auth:web'], function () {
     Route::group(['middleware' => 'web.check.role:admin,teknisi'], function () {
         // PREFIX MASTER
         Route::group(['prefix' => 'master'], function () {
-            Route::get('/device', action: [DeviceController::class, 'index'])->name('device');
             Route::get('/faq', action: [DeviceFaqController::class, 'index'])->name('faq');
         });
 

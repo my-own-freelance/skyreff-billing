@@ -31,6 +31,12 @@
                         <p>Subscription</p>
                     </a>
                 </li>
+                <li class="nav-item ml-3 {{ $routename == 'device' ? 'active' : '' }}">
+                    <a href="{{ route('device') }}">
+                        <i class="fas fa-server"></i> {{-- Device --}}
+                        <p>Device</p>
+                    </a>
+                </li>
                 <li class="nav-item ml-3 {{ $routename == 'invoice' ? 'active' : '' }}">
                     <a href="{{ route('invoice') }}">
                         <i class="fas fa-file-invoice-dollar"></i> {{-- Invoice --}}

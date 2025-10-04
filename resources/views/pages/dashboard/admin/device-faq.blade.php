@@ -79,7 +79,7 @@
                         </div>
                         <div class="form-group">
                             <label for="answer">Jawaban</label>
-                            <textarea class="form-control" id="answer" name="answer" placeholder="masukkan jawaban" required></textarea>
+                            <textarea class="form-control" id="answer" name="answer" placeholder="masukkan jawaban" required cols="30" rows="10"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="order">Urutan</label>

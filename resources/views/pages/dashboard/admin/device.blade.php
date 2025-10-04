@@ -64,11 +64,6 @@
                                 placeholder="Masukkan kutipan singkat mengenai device" />
                         </div>
                         <div class="form-group">
-                            <label for="description">Deskripsi</label>
-                            <textarea class="form-control" id="description" name="description" rows="4"
-                                placeholder="Masukkan deskripsi detail device"></textarea>
-                        </div>
-                        <div class="form-group">
                             <label for="is_active">Status</label>
                             <select class="form-control" id="is_active" name="is_active" required>
                                 <option value="">Pilih Status</option>
@@ -80,6 +75,10 @@
                             <label for="image">Gambar</label>
                             <input class="form-control" id="image" type="file" name="image" />
                             <small class="text-danger">Max ukuran 2MB</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Dekripsi</label>
+                            <div id="summernote" name="description"></div>
                         </div>
                         <div class="form-group">
                             <button class="btn btn-sm btn-primary" type="submit" id="submit">
@@ -98,7 +97,15 @@
 @endsection
 @push('scripts')
     <script src="{{ asset('/dashboard/js/plugin/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('/dashboard/js/plugin/summernote/summernote-bs4.min.js') }}"></script>
     <script>
+        $('#summernote').summernote({
+            placeholder: 'masukkan deskripsi',
+            fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New'],
+            tabsize: 2,
+            height: 300
+        });
+
         let dTable = null;
 
         $(function() {
@@ -140,6 +147,7 @@
 
         function refreshData() {
             dTable.ajax.reload(null, false);
+            $("#summernote").summernote('code', "");
         }
 
         function addData() {
@@ -153,6 +161,7 @@
             $("#formEditable").slideUp(200, function() {
                 $("#boxTable").removeClass("col-md-7").addClass("col-md-12");
                 $("#reset").click();
+                $("#summernote").summernote('code', "");
             })
         }
 
@@ -168,7 +177,7 @@
                         $("#id").val(d.id);
                         $("#name").val(d.name);
                         $("#excerpt").val(d.excerpt);
-                        $("#description").val(d.description);
+                        $("#summernote").summernote('code', d.description);
                         $("#is_active").val(d.is_active).change();
                         $("#image").attr("required", false);
                     })
@@ -187,7 +196,7 @@
             formData.append("id", parseInt($("#id").val()));
             formData.append("name", $("#name").val());
             formData.append("excerpt", $("#excerpt").val());
-            formData.append("description", $("#description").val());
+            formData.append("description", $("#summernote").summernote('code'));
             formData.append("is_active", $("#is_active").val());
             formData.append("image", document.getElementById("image").files[0]);
 

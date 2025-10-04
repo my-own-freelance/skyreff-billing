@@ -39,6 +39,7 @@ Route::group(['middleware' => 'check.auth'], function () {
     Route::get("/statik-session", [DashboardController::class, "getStatikSession"])->name("statik-session");
     Route::get("/account/detail", [UserController::class, "getDetailAccount"])->name("user.detail-account");
     Route::post("/account/update", [UserController::class, "updateAccountReseller"])->name("user.update-account");
+    Route::get('/master/device/datatable', [DeviceController::class, 'dataTable'])->name('device.datatable');
 
     Route::group(['prefix' => 'manage'], function () {
         // TICKET
@@ -147,7 +148,6 @@ Route::group(['middleware' => 'check.auth'], function () {
         Route::group(['prefix' => 'master'], function () {
             // DEVICE
             Route::group(['prefix' => 'device'], function () {
-                Route::get('datatable', [DeviceController::class, 'dataTable'])->name('device.datatable');
                 Route::get('{id}/detail', [DeviceController::class, 'getDetail'])->name('device.detail');
                 Route::post('create', [DeviceController::class, 'create'])->name('device.create');
                 Route::post('update', [DeviceController::class, 'update'])->name('device.update');
