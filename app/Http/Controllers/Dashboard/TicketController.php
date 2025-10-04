@@ -83,10 +83,23 @@ class TicketController extends Controller
                                 </div>
                             </div>";
                 } else if ($user->role == "member") {
+                    $editTicket = $item->status == "open" && $item->created_by == $user->id ? "<a class='dropdown-item' onclick='return getData(\"{$item->id}\");'>Edit</a>" : '';
+                    $deleteTicket = $item->status == "open" && $item->created_by == $user->id ?  "<a class='dropdown-item' onclick='return removeData(\"{$item->id}\");'>Hapus</a>" : '';
+
+                    $action = "<div class='dropdown-primary dropdown open'>
+                                <button class='btn btn-sm btn-primary dropdown-toggle' id='dropdown-{$item->id}' data-toggle='dropdown'>
+                                    Aksi
+                                </button>
+                                <div class='dropdown-menu'>
+                                    <a class='dropdown-item' onclick='return showDetail(\"{$item->id}\");'>Detail</a>
+                                    " . $editTicket . "
+                                    " . $deleteTicket . "
+                                </div>
+                            </div>";
                 } else if ($user->role == "teknisi") {
                     $claimTicket = $item->technician_id == null && $item->status == "open" ?  "<a class='dropdown-item' onclick='return claimTicket(\"{$item->id}\");'>Klaim Tiket</a>" : '';
                     // Tombol Process (buka modal update progress)
-                    $processTicket = $item->status != "success" ? "<a class='dropdown-item' onclick='return openUpdateProgress(\"{$item->id}\", \"{$item->status}\", `" . addslashes($item->solution ?? '') . "`);'>Process</a>" : "";
+                    $processTicket = $item->status != "success" && $item->technician_id == $user->id ? "<a class='dropdown-item' onclick='return openUpdateProgress(\"{$item->id}\", \"{$item->status}\", `" . addslashes($item->solution ?? '') . "`);'>Process</a>" : "";
 
                     $action = "<div class='dropdown-primary dropdown open'>
                                 <button class='btn btn-sm btn-primary dropdown-toggle' id='dropdown-{$item->id}' data-toggle='dropdown'>
@@ -358,7 +371,7 @@ class TicketController extends Controller
             $data = $request->all();
             $rules = [
                 'ticket_id' => 'required|integer|exists:tickets,id',
-                'status' => 'required|in:inprogress,success,reject,failed',
+                'status' => 'required|in:open,inprogress,success,reject,failed',
                 'solution' => 'nullable|string',
                 'completion_image' => 'nullable|image|max:2048|mimes:jpeg,jpg,png',
             ];
