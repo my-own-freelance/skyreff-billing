@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\Device;
+use App\Models\DeviceSubscription;
 use App\Models\Invoice;
 use App\Models\Mutation;
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\Ticket;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -41,8 +44,24 @@ class DashboardController extends Controller
                 })
                 ->get();
 
+            $subscription = Subscription::where("user_id", $user->id)->first();
+            $totDevice = $subscription ? DeviceSubscription::where("subscription_id", $subscription->id)->count() : 0;
+            $totInvoiceUnpaid = Invoice::where("user_id", $user->id)->where("status", "UNPAID")->count();
+            $totOpenTicket = Ticket::where("member_id", $user->id)->where("status", "open")->count();
+            $currentInvoices = Invoice::where("user_id", $user->id)->orderBy('id', 'desc')->get();
+            $tickets = Ticket::with(['member:id,name', 'technician:id,name'])->where("member_id", $user->id)->get();
+            $deviceSubscriptionIds = $subscription ? DeviceSubscription::where("subscription_id", $subscription->id)->pluck("device_id")->toArray() :  [];
+            $devices = Device::whereIn("id", $deviceSubscriptionIds)->get();
+
             $data = [
                 "announcements" => $announcements,
+                "subscription" => $subscription,
+                "totDevice" => $totDevice,
+                "totInvoiceUnpaid" => $totInvoiceUnpaid,
+                "totOpenTicket" => $totOpenTicket,
+                "currentInvoices" => $currentInvoices,
+                "tickets" => $tickets,
+                "devices" => $devices
             ];
         } else if ($user->role == "teknisi") {
             $teknisi = User::where("id", $user->id)->first();
