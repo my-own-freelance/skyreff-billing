@@ -70,10 +70,12 @@ class DashboardController extends Controller
             $tglAwal = Carbon::now('UTC')->startOfMonth()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
             $tglAkhir = Carbon::now('UTC')->endOfMonth()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
             $commissionThisMonth = Mutation::where("type", "C")->where("user_id", $teknisi->id)->whereBetween("created_at", [$tglAwal, $tglAkhir])->sum("amount") ?? 0;
+            $tickets = Ticket::with(['member:id,name', 'technician:id,name'])->where("technician_id", $user->id)->limit(10)->get();
             $data = [
                 "commission" => 'Rp. ' . number_format($teknisi->commission, 0, ',', '.'),
                 "wd_commission" => 'Rp. ' . number_format($wdCommisson, 0, ',', '.'),
                 "month_commission" => 'Rp. ' . number_format($commissionThisMonth, 0, ',', '.'),
+                "tickets" => $tickets
             ];
         } else {
             // ADMIN
