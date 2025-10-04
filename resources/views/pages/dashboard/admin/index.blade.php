@@ -12,7 +12,7 @@
                 <div class="card-body p-3 text-center">
                     <h2 class="mt-2"><b class="text2_primary" style="font-weight: 900;">ESTIMASI TAHUNAN</b></h2>
                     <h1 class="text-primary"><i class="fas fa-money-bill-wave" style="font-size: 300%;"></i></h1>
-                    <h4><b style="font-size:150%;" id="w3_balance">{{ $data['trx_total_amount'] }}</b></h4>
+                    <h4><b style="font-size:150%; " id="w3_balance" class="counter">{{ $data['trx_total_amount'] }}</b></h4>
                     <div class="text-muted mb-3">Pendapatan Bruto</div>
                     <a class="btn btn-primary text-white btn-block" href="{{ route('invoice') }}"> Invoice Plan</a>
                 </div>
@@ -23,7 +23,7 @@
                 <div class="col-md-4">
                     <div class="card card-primary">
                         <div class="card-body skew-shadow">
-                            <h1 class="mt-4">{{ $data['trx_total_amount_bln'] }}</h1>
+                            <h1 class="mt-4 counter">{{ $data['trx_total_amount_bln'] }}</h1>
                             <h3 class="mt-3">Total Bulanan</h3>
                             <div class="pull-right mt-4"><small>Estimasi Bulan Ini</small></div>
                         </div>
@@ -32,7 +32,7 @@
                 <div class="col-md-4">
                     <div class="card card-primary">
                         <div class="card-body bubble-shadow">
-                            <h1 class="mt-4">{{ $data['trx_total_amount_smt1'] }}</h1>
+                            <h1 class="mt-4 counter">{{ $data['trx_total_amount_smt1'] }}</h1>
                             <h3 class="mt-3">Semester 1</h3>
                             <div class="pull-right mt-4"><small>Estimasi Semester 1</small></div>
                         </div>
@@ -41,7 +41,7 @@
                 <div class="col-md-4">
                     <div class="card card-primary">
                         <div class="card-body skew-shadow">
-                            <h1 class="mt-4">{{ $data['trx_total_amount_smt2'] }}</h1>
+                            <h1 class="mt-4 counter">{{ $data['trx_total_amount_smt2'] }}</h1>
                             <h3 class="mt-3">Semester 2</h3>
                             <div class="pull-right mt-4"><small>Estimasi Semester 2</small></div>
                         </div>
@@ -251,5 +251,18 @@
                 legendItems[i].addEventListener("click", legendClickCallback, false);
             }
         }
+
+        // Counter animation
+        $('.counter').each(function() {
+            $(this).prop('Counter', 0).animate({
+                Counter: parseInt($(this).text().replace(/\D/g, ''))
+            }, {
+                duration: 1000,
+                easing: 'swing',
+                step: function(now) {
+                    $(this).text(Math.ceil(now).toLocaleString('id-ID'));
+                }
+            });
+        });
     </script>
 @endpush

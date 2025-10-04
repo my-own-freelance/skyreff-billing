@@ -13,13 +13,13 @@
                     </span>
                     <h4 class="text-section">NAVIGATION</h4>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'dashboard' ? 'active' : '' }}">
-                    <a href="{{ route('dashboard.teknisi') }}" aria-expanded="false">
+                <li class="nav-item ml-3 {{ $routename == 'dashboard.member' ? 'active' : '' }}">
+                    <a href="{{ route('dashboard.member') }}" aria-expanded="false">
                         <i class="fas fa-home"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
-                <li class="nav-item ml-3">
+                <li class="nav-item ml-3 {{ $routename == 'user.account' ? 'active' : '' }}">
                     <a href="{{ route('user.account') }}">
                         <i class="fas fa-user-cog"></i>
                         <p>Setting Account</p>

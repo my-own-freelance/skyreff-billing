@@ -13,7 +13,7 @@
                     </span>
                     <h4 class="text-section">NAVIGATION</h4>
                 </li>
-                <li class="nav-item ml-3 {{ $routename == 'dashboard' ? 'active' : '' }}">
+                <li class="nav-item ml-3 {{ $routename == 'dashboard.admin' ? 'active' : '' }}">
                     <a href="{{ route('dashboard.admin') }}" aria-expanded="false">
                         <i class="fas fa-tachometer-alt"></i> {{-- Dashboard --}}
                         <p>Dashboard</p>
