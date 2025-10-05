@@ -67,8 +67,19 @@ class TicketController extends Controller
                 $query->where('member_id', strtoupper($request->query('member_id')));
             }
 
+            // filter type
+            if ($request->query('type') && $request->query('type') != '') {
+                $query->where('type', $request->query('type'));
+            }
+
+            if ($request->query("sort_by") && $request->query("sort_type")) {
+                $query->orderBy($request->query("sort_by"), $request->query("sort_type"));
+            } else {
+                $query->orderBy('id', 'desc');
+            }
+
             $recordsFiltered = $query->count();
-            $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
+            $data = $query->skip($request->query('start'))->limit($request->query('length'))->get();
 
             $output = $data->map(function ($item) use ($user) {
                 $action = "";

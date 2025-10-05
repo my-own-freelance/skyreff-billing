@@ -20,6 +20,38 @@
                         <div class="row">
                             <div class="col-md-2">
                                 <div class="form-group">
+                                    <label for="fSortBy">Sorting By</label>
+                                    <select class="form-control" id="fSortBy" name="fSortBy">
+                                        <option value="created_at">Date Created</option>
+                                        <option value="updated_at">Updated</option>
+                                        <option value="status">Status</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortType">Sorting Type</label>
+                                    <select class="form-control" id="fSortType" name="fSortType">
+                                        <option value="desc">Desc</option>
+                                        <option value="asc">Asc</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fFilterType">Filter Type</label>
+                                    <select class="form-control" id="fFilterType" name="fFilterType">
+                                        <option value="">All</option>
+                                        <option value="gangguan">Gangguan</option>
+                                        <option value="maintenance">Maintenance</option>
+                                        <option value="pemasangan">Pemasangan</option>
+                                        <option value="troubleshoot">Troubleshoot</option>
+                                        <option value="lain-lain">Lain-lain</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
                                     <label for="fMember">Filter Member</label>
                                     <select class="form-control" id="fMember" name="fMember">
                                         <option value="">All</option>
@@ -269,6 +301,9 @@
         $('#formFilter').submit(function(e) {
             e.preventDefault()
             let dataFilter = {
+                sort_by: $("#fSortBy").val(),
+                sort_type: $("#fSortType").val(),
+                type: $("#fFilterType").val(),
                 member_id: $("#fMember").val(),
                 technician_id: $("#fTechnician").val()
             }
