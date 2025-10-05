@@ -38,8 +38,13 @@ class MemberController extends Controller
             }
 
             $recordsFiltered = $query->count();
+            if ($request->query("sort_by") && $request->query("sort_type")) {
+                $query->orderBy($request->query("sort_by"), $request->query("sort_type"));
+            } else {
+                $query->orderBy('id', 'desc');
+            }
 
-            $data = $query->orderBy('name', 'asc')->skip($request->query('start'))->limit($request->query('length'))->get();
+            $data = $query->skip($request->query('start'))->limit($request->query('length'))->get();
 
             $user = auth()->user();
             $output = $data->map(function ($item) use ($user) {
@@ -60,27 +65,27 @@ class MemberController extends Controller
 
                 $is_active =
                     $item->is_active == 'Y'
-                        ? '
+                    ? '
                     <div class="text-center">
                         <span class="label-switch">Active</span>
                     </div>
                     <div class="input-row">
                         <div class="toggle_status on">
                             <input type="checkbox" onclick="return updateStatus(\'' .
-                            $item->id .
-                            '\', \'Disabled\');" />
+                    $item->id .
+                    '\', \'Disabled\');" />
                             <span class="slider"></span>
                         </div>
                     </div>'
-                        : '
+                    : '
                     <div class="text-center">
                         <span class="label-switch">Disabled</span>
                     </div>
                     <div class="input-row">
                         <div class="toggle_status off">
                             <input type="checkbox" onclick="return updateStatus(\'' .
-                            $item->id .
-                            '\', \'Active\');" />
+                    $item->id .
+                    '\', \'Active\');" />
                             <span class="slider"></span>
                         </div>
                     </div>';
