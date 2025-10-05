@@ -57,10 +57,25 @@ class SubscriptionController extends Controller
                 $query->where("user_id", $user->id);
             }
 
-            $recordsFiltered = $query->count();
 
-            $data = $query->orderBy('id', 'desc')
-                ->skip($request->query('start'))
+            // FILTER MEMBER
+            if ($request->query("user_id") && $request->query("user_id") != "") {
+                $query->where('user_id', $request->query("user_id"));
+            }
+
+            // FILTER PLAN
+            if ($request->query("plan_id") && $request->query("plan_id") != "") {
+                $query->where("plan_id", $request->query("plan_id"));
+            }
+
+            if ($request->query("sort_by") && $request->query("sort_type")) {
+                $query->orderBy($request->query("sort_by"), $request->query("sort_type"));
+            } else {
+                $query->orderBy('id', 'desc');
+            }
+
+            $recordsFiltered = $query->count();
+            $data = $query->skip($request->query('start'))
                 ->limit($request->query('length'))
                 ->get();
 

@@ -15,6 +15,62 @@
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
                         <button class="btn btn-mini btn-primary" onclick="return addData();">Tambah</button>
                     </div>
+                    <form class="navbar-left navbar-form mr-md-1 mt-3" id="formFilter">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortBy">Sorting By</label>
+                                    <select class="form-control" id="fSortBy" name="fSortBy">
+                                        <option value="created_at">Date Created</option>
+                                        <option value="subscription_number">Number</option>
+                                        <option value="type">Type</option>
+                                        <option value="status">Status</option>
+                                        <option value="next_invoice_at">Next Invoice</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortType">Sorting Type</label>
+                                    <select class="form-control" id="fSortType" name="fSortType">
+                                        <option value="desc">Desc</option>
+                                        <option value="asc">Asc</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fFilterMember">Filter Member</label>
+                                    <select class="form-control" id="fFilterMember" name="fFilterMember">
+                                        <option value="">All</option>
+                                        @foreach ($members as $member)
+                                            <option value="{{ $member->id }}">({{ $member->username }})
+                                                {{ $member->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fFilterPlan">Filter Plan</label>
+                                    <select class="form-control" id="fFilterPlan" name="fFilterPlan">
+                                        <option value="">All</option>
+                                        @foreach ($plans as $plan)
+                                            <option value="{{ $plan->id }}">
+                                                {{ $plan->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="pt-3">
+                                    <button class="mt-4 btn btn-sm btn-success mr-3" type="submit">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-block">
                     <div class="table-responsive mt-3">
@@ -283,8 +339,10 @@
             dataTable();
         });
 
-        function dataTable() {
-            const url = "{{ route('subscription.datatable') }}";
+        function dataTable(filter) {
+            let url = "{{ route('subscription.datatable') }}";
+            if (filter) url += "?" + filter;
+
             dTable = $("#subscriptionDataTable").DataTable({
                 searching: true,
                 ordering: true,
@@ -331,6 +389,23 @@
         function refreshData() {
             dTable.ajax.reload(null, false);
         }
+
+        $('#formFilter').submit(function(e) {
+            e.preventDefault()
+            let dataFilter = {
+                sort_by: $("#fSortBy").val(),
+                sort_type: $("#fSortType").val(),
+                user_id: $("#fFilterMember").val(),
+                plan_id: $("#fFilterPlan").val()
+            }
+
+            dTable.clear();
+            dTable.destroy();
+            dataTable($.param(dataFilter))
+            return false
+        })
+
+
 
         function addData() {
             $("#formEditable").attr('data-action', 'add').fadeIn(200);
