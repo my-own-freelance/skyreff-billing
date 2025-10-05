@@ -19,15 +19,24 @@ class Kernel extends ConsoleKernel
 
         // // Cek expired invoice tiap hari jam 1 pagi
         // $schedule->command('billing:check-expired-invoices')->dailyAt('01:00');
-
         if (app()->environment('production')) {
-            // Production: jalan tiap 3 jam sekali
-            $schedule->command('invoices:generate')->cron('0 */3 * * *');
-            $schedule->command('invoice:check-expired')->cron('0 */3 * * *');
+            // Production: tiap 3 jam
+            $schedule->command('invoices:generate')
+                ->cron('0 */3 * * *')
+                ->appendOutputTo(storage_path('logs/cron.log'));
+
+            $schedule->command('invoice:check-expired')
+                ->cron('0 */3 * * *')
+                ->appendOutputTo(storage_path('logs/cron.log'));
         } else {
-            // Development: jalan tiap 1 menit
-            $schedule->command('invoices:generate')->everyMinute();
-            $schedule->command('invoice:check-expired')->everyMinute();
+            // Development: tiap 1 menit
+            $schedule->command('invoices:generate')
+                ->everyMinute()
+                ->appendOutputTo(storage_path('logs/cron.log'));
+
+            $schedule->command('invoice:check-expired')
+                ->everyMinute()
+                ->appendOutputTo(storage_path('logs/cron.log'));
         }
     }
 
