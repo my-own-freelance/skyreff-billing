@@ -20,6 +20,87 @@
                     <div class="card-header-right">
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
                     </div>
+                    <form class="navbar-left navbar-form mr-md-1 mt-3" id="formFilter">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Tanggal Mulai</label>
+                                    <input class="form-control date-picker" id="dateFrom" type="text"
+                                        placeholder="Pilih tanggal awal" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Tanggal Akhir</label>
+                                    <input class="form-control date-picker" id="dateTo" type="text"
+                                        placeholder="Pilih tanggal akhir" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortBy">Sorting By</label>
+                                    <select class="form-control" id="fSortBy" name="fSortBy">
+                                        <option value="created_at">Date Invoice</option>
+                                        <option value="due_date">Date Expired</option>
+                                        <option value="paid_at">Date Payment</option>
+                                        <option value="invoice_number">Inovice Number</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortType">Sorting Type</label>
+                                    <select class="form-control" id="fSortType" name="fSortType">
+                                        <option value="desc">Desc</option>
+                                        <option value="asc">Asc</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fFilterStatus">Filter Status</label>
+                                    <select class="form-control" id="fFilterStatus" name="fFilterStatus">
+                                        <option value="">All</option>
+                                        <option value="unpaid">Unpaid</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="expired">Expired</option>
+                                        <option value="cancel">Cancel</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fMember">Filter Member</label>
+                                    <select class="form-control" id="fMember" name="fMember">
+                                        <option value="">All</option>
+                                        @foreach ($members as $member)
+                                            <option value="{{ $member->id }}">({{ $member->username }})
+                                                {{ $member->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fFilterPlan">Filter Plan</label>
+                                    <select class="form-control" id="fFilterPlan" name="fFilterPlan">
+                                        <option value="">All</option>
+                                        @foreach ($plans as $plan)
+                                            <option value="{{ $plan->id }}">
+                                                {{ $plan->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="pt-3">
+                                    <button class="mt-4 btn btn-sm btn-success mr-3" type="submit">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-block">
                     <div class="table-responsive mt-3">
@@ -56,15 +137,27 @@
 
 @push('scripts')
     <script src="{{ asset('/dashboard/js/plugin/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('/dashboard/js/plugin/moment/moment.min.js') }}"></script>
+    <script src="{{ asset('/dashboard/js/plugin/datepicker/bootstrap-datetimepicker.min.js') }}"></script>
     <script>
         let dTable = null;
 
         $(function() {
+            $('#dateFrom').datetimepicker({
+                format: 'DD/MM/YYYY',
+            });
+            $('#dateTo').datetimepicker({
+                format: 'DD/MM/YYYY',
+            });
+            $("#dateFrom").val(moment().startOf('month').format("DD/MM/YYYY"))
+            $("#dateTo").val(moment().endOf('month').format("DD/MM/YYYY"))
             dataTable();
         })
 
-        function dataTable() {
-            const url = "{{ route('invoice.datatable') }}";
+        function dataTable(filter) {
+            let url = "{{ route('invoice.datatable') }}";
+            if (filter) url += "?" + filter;
+
             dTable = $("#invoiceDataTable").DataTable({
                 searching: true,
                 ordering: true,
@@ -118,6 +211,23 @@
             dTable.ajax.reload(null, false);
         }
 
+        $('#formFilter').submit(function(e) {
+            e.preventDefault()
+            let dataFilter = {
+                tgl_awal: $("#dateFrom").val(),
+                tgl_akhir: $("#dateTo").val(),
+                sort_by: $("#fSortBy").val(),
+                sort_type: $("#fSortType").val(),
+                status: $("#fFilterStatus").val(),
+                user_id: $("#fMember").val(),
+                plan_id: $("#fFilterPlan").val()
+            }
+
+            dTable.clear();
+            dTable.destroy();
+            dataTable($.param(dataFilter))
+            return false
+        })
 
         function printInvoice(id) {
             window.open("{{ url('dashboard/invoice/print') }}/" + id, "_blank");

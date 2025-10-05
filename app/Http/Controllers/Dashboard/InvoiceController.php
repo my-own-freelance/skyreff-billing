@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Plan;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -17,8 +18,10 @@ class InvoiceController extends Controller
     {
         $title = 'Invoice';
         $pageUrl = "pages.dashboard.admin.invoice";
+        $members = User::where('role', 'member')->get();
+        $plans = Plan::all();
         if (auth()->user()->role == "member") $pageUrl = "pages.dashboard.member.invoice";
-        return view($pageUrl, compact('title'));
+        return view($pageUrl, compact('title', 'members', 'plans'));
     }
 
     public function dataTable(Request $request)
@@ -47,9 +50,49 @@ class InvoiceController extends Controller
                 $query->where("user_id", $user->id);
             }
 
+            // filter type
+            if ($request->query("status") && $request->query("status") != "") {
+                $query->where("status", $request->query("status"));
+            }
+
+            // filter member
+            if ($request->query("user_id") && $request->query("user_id") != "") {
+                $query->where("user_id", $request->query("user_id"));
+            }
+
+            // filter plan
+            if ($request->query("plan_id") && $request->query("plan_id") != "") {
+                $query->where("plan_id", $request->query("plan_id"));
+            }
+
+            // filter tanggal awal - tanggal akhir per bulan saat ini
+            $tglAwal = $request->query('tgl_awal');
+            $tglAkhir = $request->query('tgl_akhir');
+
+            if (!$tglAwal) {
+                $tglAwal = Carbon::now('UTC')->startOfMonth()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
+            }
+
+            if (!$tglAkhir) {
+                $tglAkhir = Carbon::now('UTC')->endOfMonth()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
+            }
+
+            if ($request->query('tgl_awal') && $request->query('tgl_akhir')) {
+                $tglAwal = Carbon::createFromFormat('d/m/Y', $request->query('tgl_awal'), 'UTC')->startOfDay()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
+                $tglAkhir = Carbon::createFromFormat('d/m/Y', $request->query('tgl_akhir'), 'UTC')->endOfDay()->subHour(7)->toDateTimeString(); // dikurangi 7 jam mengikuti waktu utc
+            }
+
+            $query->whereBetween('created_at', [$tglAwal, $tglAkhir]);
+
+            if ($request->query("sort_by") && $request->query("sort_type")) {
+                $query->orderBy($request->query("sort_by"), $request->query("sort_type"));
+            } else {
+                $query->orderBy('id', 'desc');
+            }
+
+
             $recordsFiltered = $query->count();
-            $data = $query->orderBy('id', 'desc')
-                ->skip($request->query('start'))
+            $data = $query->skip($request->query('start'))
                 ->limit($request->query('length'))
                 ->get();
 
