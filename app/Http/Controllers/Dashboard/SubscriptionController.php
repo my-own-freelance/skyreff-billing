@@ -299,16 +299,16 @@ class SubscriptionController extends Controller
                         // link google maps dari latitude/longitude atau alamat
                         $linkMap = $member->link_maps;
 
-                        $message = "Halo {$technician->name},\n";
+                        $message = "Halo {$technician->name},\n\n";
                         $message .= "Terdapat tiket pemasangan baru yang harus Anda tangani.\n\n";
-                        $message .= "Member: {$member->name}\n";
-                        $message .= "Phone: {$member->phone}\n";
-                        $message .= "Alamat: {$member->address}\n";
+                        $message .= "*Member:* {$member->name}\n";
+                        $message .= "*Phone:* {$member->phone}\n";
+                        $message .= "*Alamat:* {$member->address}\n";
                         if ($linkMap) {
-                            $message .= "Lokasi: {$linkMap}\n";
+                            $message .= "*Lokasi: {$linkMap}\n";
                         }
-                        $message .= "Paket : {$plan->name}\n";
-                        $message .= "Subscription: {$subscription->subscription_number}\n";
+                        $message .= "*Paket :* {$plan->name}\n";
+                        $message .= "*Subscription:* {$subscription->subscription_number}\n\n";
                         $message .= "Silakan segera lakukan follow up pemasangan.\nTerima kasih.";
 
                         $payload = [

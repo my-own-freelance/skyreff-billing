@@ -263,11 +263,11 @@ class InvoiceController extends Controller
                     ->translatedFormat('d M Y') : '-';
                 $plan = $invoice->plan;
 
-                $message = "Halo {$member->name},\n";
-                $message .= "Invoice Anda dengan nomor: {$invoiceNumber} telah *dibayar*.\n";
-                $message .= "Jumlah: Rp {$amount}\n";
-                $message .= "Paket : {$plan->name}\n";
-                $message .= "Periode: {$periodStart} s/d {$periodEnd}\n";
+                $message = "Halo {$member->name},\n\n";
+                $message .= "Invoice Anda dengan nomor: {$invoiceNumber} telah *dibayar*.\n\n";
+                $message .= "*Jumlah:* Rp {$amount}\n";
+                $message .= "*Paket :* {$plan->name}\n";
+                $message .= "*Periode:* {$periodStart} s/d {$periodEnd}\n\n";
                 $message .= "Terima kasih telah melakukan pembayaran tepat waktu.";
 
                 $payload = [
