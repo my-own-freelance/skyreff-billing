@@ -20,13 +20,13 @@ class Kernel extends ConsoleKernel
         // // Cek expired invoice tiap hari jam 1 pagi
         // $schedule->command('billing:check-expired-invoices')->dailyAt('01:00');
         if (app()->environment('production')) {
-            // Production: tiap 3 jam
+            // Production: tiap 1 jam
             $schedule->command('invoices:generate')
-                ->cron('0 */3 * * *')
+                ->cron('0 */1 * * *')
                 ->appendOutputTo(storage_path('logs/cron.log'));
 
             $schedule->command('invoice:check-expired')
-                ->cron('0 */3 * * *')
+                ->cron('0 */1 * * *')
                 ->appendOutputTo(storage_path('logs/cron.log'));
         } else {
             // Development: tiap 1 menit
