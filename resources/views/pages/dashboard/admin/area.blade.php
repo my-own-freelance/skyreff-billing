@@ -21,6 +21,34 @@
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
                         <button class="btn btn-mini btn-primary" onclick="return addData();">Tambah Data</button>
                     </div>
+                    <form class="navbar-left navbar-form mr-md-1 mt-3" id="formFilter">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortBy">Sorting By</label>
+                                    <select class="form-control" id="fSortBy" name="fSortBy">
+                                        <option value="created_at">Date Created</option>
+                                        <option value="name">Name</option>
+                                        <option value="code">Code</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="fSortType">Sorting Type</label>
+                                    <select class="form-control" id="fSortType" name="fSortType">
+                                        <option value="desc">Desc</option>
+                                        <option value="asc">Asc</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="pt-3">
+                                    <button class="mt-4 btn btn-sm btn-success mr-3" type="submit">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-block">
                     <div class="table-responsive mt-3">
@@ -74,7 +102,7 @@
                             <textarea class="form-control" id="description" name="description" placeholder="opsional deskripsi area"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="meta">Meta (JSON) -  (optional)</label>
+                            <label for="meta">Meta (JSON) - (optional)</label>
                             <textarea class="form-control" id="meta" name="meta" placeholder='contoh: {"key":"value"}'></textarea>
                         </div>
                         <div class="form-group">
@@ -100,8 +128,10 @@
             dataTable();
         })
 
-        function dataTable() {
-            const url = "{{ route('area.datatable') }}";
+        function dataTable(filter) {
+            let url = "{{ route('area.datatable') }}";
+            if (filter) url += "?" + filter;
+
             dTable = $("#areaDataTable").DataTable({
                 searching: true,
                 ordering: true,
@@ -143,6 +173,21 @@
         function refreshData() {
             dTable.ajax.reload(null, false);
         }
+
+        $('#formFilter').submit(function(e) {
+            e.preventDefault()
+            let dataFilter = {
+                sort_by: $("#fSortBy").val(),
+                sort_type: $("#fSortType").val()
+            }
+
+            dTable.clear();
+            dTable.destroy();
+            dataTable($.param(dataFilter))
+            return false
+        })
+
+
 
         function addData() {
             $("#formEditable").attr('data-action', 'add').fadeIn(200);

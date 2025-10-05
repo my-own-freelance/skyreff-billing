@@ -32,7 +32,12 @@ class AreaController extends Controller
             }
 
             $recordsFiltered = $query->count();
-            $data = $query->orderBy('id', 'desc')->skip($request->query('start'))->limit($request->query('length'))->get();
+            if ($request->query("sort_by") && $request->query("sort_type")) {
+                $query->orderBy($request->query("sort_by"), $request->query("sort_type"));
+            } else {
+                $query->orderBy('id', 'desc');
+            }
+            $data = $query->skip($request->query('start'))->limit($request->query('length'))->get();
 
             $output = $data->map(function ($item) {
                 $action = " <div class='dropdown-primary dropdown open'>

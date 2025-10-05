@@ -13,7 +13,6 @@
                     </div>
                     <div class="card-header-right">
                         <button class="btn btn-mini btn-info mr-1" onclick="return refreshData();">Refresh</button>
-                        <button class="btn btn-mini btn-primary" onclick="return addData();">Tambah Data</button>
                     </div>
                 </div>
                 <div class="card-block">

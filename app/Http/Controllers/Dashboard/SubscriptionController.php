@@ -115,7 +115,6 @@ class SubscriptionController extends Controller
                     ?
                     '<div>
                         <span class="badge badge-info">Username: ' . e($item->username ?? '-') . '</span><br>
-                        <span class="badge badge-secondary">Password: ' . e($item->password ?? '-') . '</span>
                     </div>'
                     : '<div>
                         <span class="badge badge-warning">Queue: ' . e($item->queue ?? '-') . '</span>
