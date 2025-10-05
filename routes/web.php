@@ -30,15 +30,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // AUTH
 Route::group(['middleware' => 'guest'], function () {
-    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::get('/', [AuthController::class, 'login'])->name('login');
 });
 
 Route::group(['middleware' => 'auth:web'], function () {
