@@ -41,8 +41,8 @@ class GenerateInvoices extends Command
                 // Hitung jumlah dari plan
                 $amount = $subscription->plan->price ?? 0;
 
-                // Tentukan due date sesuai dengan subcription end
-                $dueDate = $subscription->current_period_end;
+                // Tentukan due date (3 hari setelah invoice keluar)
+                $dueDate = now()->addDays(3);
 
                 // Buat invoice baru
                 $invoice = Invoice::create([
