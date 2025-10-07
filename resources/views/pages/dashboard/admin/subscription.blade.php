@@ -202,37 +202,6 @@
                             <small class="text-muted">Tanggal ini akan digunakan untuk generate invoice otomatis</small>
                         </div>
 
-                        <!-- Tiket Teknisi -->
-                        <div class="form-group" id="divTask">
-                            <label for="fCreateTask">Buat Tiket Teknisi</label>
-                            <select id="fCreateTask" name="fCreateTask" class="form-control">
-                                <option value="tidak">Tidak</option>
-                                <option value="ya">Ya</option>
-                            </select>
-                        </div>
-
-                        <!-- Pilih Teknisi dan Notifikasi -->
-                        <div class="form-group" id="divTechnician" style="display:none;">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="fTechnician">Pilih Teknisi</label>
-                                    <select id="fTechnician" name="fTechnician" class="form-control select2">
-                                        <option value="">Pilih Teknisi</option>
-                                        @foreach ($technicians as $tech)
-                                            <option value="{{ $tech->id }}">{{ $tech->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="fTechnicianNotif">Kirim Notif Ke Teknisi</label>
-                                    <select id="fTechnicianNotif" name="fTechnicianNotif" class="form-control">
-                                        <option value="ya">Ya</option>
-                                        <option value="tidak">Tidak</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Submit -->
                         <div class="form-group mt-3">
                             <button class="btn btn-sm btn-primary" type="submit" id="submit">
@@ -319,17 +288,6 @@
             // toggle on type change
             $('#type').on('change', function() {
                 toggleInputByType();
-            });
-
-            // Toggle divTechnician berdasarkan fCreateTask
-            $('#fCreateTask').on('change', function() {
-                if ($(this).val() === 'ya') {
-                    $('#divTechnician').slideDown();
-                } else {
-                    $('#divTechnician').slideUp();
-                    $('#fTechnician').val('');
-                    $('#fTechnicianNotif').val('ya');
-                }
             });
         });
 
@@ -455,16 +413,6 @@
                         $("#current_period_start").val(formatDateTimeLocal(d.current_period_start));
                         $("#current_period_end").val(formatDateTimeLocal(d.current_period_end));
                         $("#next_invoice_at").val(formatDateTimeLocal(d.next_invoice_at));
-
-                        // tiket teknisi
-                        $("#fCreateTask").val(d.create_task || "tidak").change();
-                        if (d.create_task === "ya") {
-                            $("#divTechnician").show();
-                            $("#fTechnician").val(d.technician_id || "").change();
-                            $("#fTechnicianNotif").val(d.create_pic_notif || "ya").change();
-                        } else {
-                            $("#divTechnician").hide();
-                        }
                     })
                 },
 
@@ -493,10 +441,6 @@
                 current_period_start: $("#current_period_start").val(),
                 current_period_end: $("#current_period_end").val(),
                 next_invoice_at: $("#next_invoice_at").val(),
-                // tiket teknisi
-                create_task: $("#fCreateTask").val(),
-                technician_id: $("#fTechnician").val(),
-                create_pic_notif: $("#fTechnicianNotif").val()
             };
 
             saveData(action, payload);

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\BroadcastHelper;
 use App\Http\Controllers\Controller;
+use App\Models\BroadcastTemplate;
 use App\Models\Ticket;
 use App\Models\User;
 use Carbon\Carbon;
@@ -207,6 +209,7 @@ class TicketController extends Controller
     {
         try {
             $data = $request->all();
+            $member = null;
             $rules = [
                 'type' => 'required|in:gangguan,maintenance,pemasangan,troubleshoot,lain-lain',
                 'status' => 'nullable|in:open,inprogress,success,reject,failed',
@@ -246,6 +249,11 @@ class TicketController extends Controller
             if (auth()->user()->role === 'member') {
                 $data['member_id'] = auth()->id();
                 $data['technician_id'] = null;
+                $member = auth()->user();
+            } else {
+                if ($data['member_id'] != null) {
+                    $member = User::find($data['member_id']);
+                }
             }
 
             // Handle upload complaint_image
@@ -261,20 +269,23 @@ class TicketController extends Controller
             if (!empty($data['technician_id'])) {
                 $technician = User::find($data['technician_id']);
                 if ($technician) {
-                    $message = "Halo {$technician->name},\n";
-                    $message .= "Anda memiliki tiket baru:\n";
-                    $message .= "Tipe: {$ticket->type}\n";
-                    $message .= "Kasus/Tiket: {$ticket->cases}\n";
-                    $message .= "Silakan segera follow up.\nTerima kasih.";
+                    // Ambil template tiket teknisi dari DB (misal code 'technician-ticket')
+                    $template = BroadcastTemplate::where('code', 'technician-ticket')->first();
 
-                    $payload = [
-                        "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
-                        "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
-                        "to" => preg_replace('/^08/', '628', $technician->phone),
-                        "message" => $message,
+                    // Mapping data
+                    $dataTemplate = [
+                        'technician_name' => $technician->name,
+                        'ticket_type'     => $ticket->type,
+                        'ticket_cases'    => $ticket->cases,
+                        'member_name'     => $member->name ?? '-',
+                        'member_phone'     => $member ? 'wa.me/' . preg_replace('/^08/', '628', $member->phone) : '-',
                     ];
 
-                    Http::post('https://app.saungwa.com/api/create-message', $payload);
+                    // Parse template
+                    $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
+
+                    // Kirim WA
+                    BroadcastHelper::send($technician->phone, $message);
                 }
             }
 

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\BroadcastHelper;
 use App\Http\Controllers\Controller;
+use App\Models\BroadcastTemplate;
 use App\Models\Invoice;
 use App\Models\Plan;
 use App\Models\User;
+use App\Models\WebConfig;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -295,7 +298,7 @@ class InvoiceController extends Controller
             if ($data['status'] === 'paid') {
                 $member = User::where('id', $invoice->user_id)->first();
                 $invoiceNumber = $invoice->invoice_number ?? $invoice->id;
-                $amount = number_format($invoice->amount ?? 0, 0, ',', '.');
+                $amount = $subscription->plan->price ?? 0;
                 $periodStart = $invoice->invoice_period_start ? Carbon::parse($invoice->invoice_period_start)
                     ->timezone('Asia/Jakarta') // atur timezone ke WIB
                     ->locale('id') // bahasa Indonesia
@@ -306,20 +309,24 @@ class InvoiceController extends Controller
                     ->translatedFormat('d M Y') : '-';
                 $plan = $invoice->plan;
 
-                $message = "Halo {$member->name},\n\n";
-                $message .= "Invoice Anda dengan nomor: {$invoiceNumber} telah *dibayar*.\n\n";
-                $message .= "*Jumlah:* Rp {$amount}\n";
-                $message .= "*Paket :* {$plan->name}\n";
-                $message .= "*Periode:* {$periodStart} s/d {$periodEnd}\n\n";
-                $message .= "Terima kasih telah melakukan pembayaran tepat waktu.";
-
-                $payload = [
-                    "appkey"   => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
-                    "authkey"  => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
-                    "to"       => preg_replace('/^08/', '628', $member->phone),
-                    "message"  => $message
+                $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-sukses-bayar")->first();
+                $appConfig = WebConfig::first();
+                // Mapping data untuk parsing
+                $dataTemplate = [
+                    'member_name'     => $member->name,
+                    'invoice_number'  => $invoiceNumber,
+                    'plan_name'       => $plan->name,
+                    'invoice_amount'  => "Rp " . number_format($amount, 0, ',', '.'),
+                    'period'          => "{$periodStart} s/d {$periodEnd}",
+                    'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                    'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
                 ];
-                Http::post('https://app.saungwa.com/api/create-message', $payload);
+
+                // Parsing template
+                $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
+
+                // Kirim broadcast WA
+                BroadcastHelper::send($member->phone, $message);
             }
 
             DB::commit();

@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\BroadcastHelper;
+use App\Models\BroadcastTemplate;
 use App\Models\Invoice;
+use App\Models\WebConfig;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -49,24 +52,39 @@ class CheckExpiredInvoices extends Command
                 $member = $invoice->user;
 
                 if ($member) {
-                    $message = "Halo {$member->name},\n\n";
-                    $message .= "Invoice Anda *{$invoice->invoice_number}* telah *expired* karena belum dibayar.\n\n";
-                    $message .= "*Jumlah:* Rp " . number_format($invoice->amount, 0, ',', '.') . "\n";
-                    $message .= "*Paket:* {$invoice->plan->name}\n";
-                    $message .= "*Jatuh Tempo:* " . Carbon::parse($invoice->due_date)
-                        ->timezone('Asia/Jakarta')
-                        ->locale('id')
-                        ->translatedFormat('d M Y H:i') . "\n\n";
-                    $message .= "Segera lakukan pembayaran agar layanan tetap aktif. 🙏";
+                    // 🔔 SEND NOTIFIKASI BROADCAST TEMPLATE
+                    $periodStart = Carbon::parse($invoice->invoice_period_start)
+                        ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                        ->locale('id') // bahasa Indonesia
+                        ->translatedFormat('d M Y');
+                    $periodEnd = Carbon::parse($invoice->invoice_period_end)
+                        ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                        ->locale('id') // bahasa Indonesia
+                        ->translatedFormat('d M Y');
+                    $dueDate = Carbon::parse($invoice->due_date)
+                        ->timezone('Asia/Jakarta') // atur timezone ke WIB
+                        ->locale('id') // bahasa Indonesia
+                        ->translatedFormat('d M Y');
 
-                    $payload = [
-                        "appkey"   => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
-                        "authkey"  => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
-                        "to"       => preg_replace('/^08/', '628', $member->phone),
-                        "message"  => $message,
+                    $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-expired")->first();
+                    $appConfig = WebConfig::first();
+                    // Mapping data untuk parsing
+                    $dataTemplate = [
+                        'member_name'     => $member->name,
+                        'invoice_number'  => $invoice->invoice_number,
+                        'plan_name'       => $invoice->plan->name,
+                        'invoice_amount'  => "Rp " . number_format($invoice->amount, 0, ',', '.'),
+                        'period'          => "{$periodStart} s/d {$periodEnd}",
+                        'invoice_due_date' => $dueDate,
+                        'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                        'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
                     ];
 
-                    Http::post('https://app.saungwa.com/api/create-message', $payload);
+                    // Parsing template
+                    $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
+
+                    // Kirim broadcast WA
+                    BroadcastHelper::send($member->phone, $message);
                 }
 
                 $this->info("Invoice {$invoice->invoice_number} ditandai expired & notifikasi terkirim.");

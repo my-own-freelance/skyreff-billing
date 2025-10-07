@@ -221,12 +221,18 @@
                 processData: false,
                 method: "POST",
                 data: data,
+                beforeSend: function() {
+                    $("#submit").attr("disabled", true);
+                    console.log("Sending data...");
+                },
                 success: function(res) {
+                    $("#submit").attr("disabled", false);
                     closeForm();
                     showMessage("success", "flaticon-alarm-1", "Sukses", res.message);
                     refreshData();
                 },
                 error: function(err) {
+                    $("#submit").attr("disabled", false);
                     showMessage("danger", "flaticon-error", "Peringatan", err.message || err.responseJSON
                         ?.message);
                 }

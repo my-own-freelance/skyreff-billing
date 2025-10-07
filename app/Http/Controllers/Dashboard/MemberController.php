@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\BroadcastHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Announcement;
 use App\Models\Area;
+use App\Models\BroadcastTemplate;
+use App\Models\DeviceSubscription;
+use App\Models\Invoice;
+use App\Models\Subscription;
+use App\Models\Ticket;
 use App\Models\User;
+use App\Models\WebConfig;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +25,8 @@ class MemberController extends Controller
     {
         $title = 'Data Owner';
         $areas = Area::all();
-        return view('pages.dashboard.admin.member', compact('title', 'areas'));
+        $technicians = User::where('role', 'teknisi')->get();
+        return view('pages.dashboard.admin.member', compact('title', 'areas', 'technicians'));
     }
 
     // HANDLER API
@@ -121,6 +131,7 @@ class MemberController extends Controller
 
     public function create(Request $request)
     {
+        DB::beginTransaction();
         try {
             $data = $request->all();
             $data['phone'] = preg_replace('/^08/', '628', $data['phone']);
@@ -134,6 +145,9 @@ class MemberController extends Controller
                 'address' => 'nullable|string|max:255',
                 'link_maps' => 'nullable|url',
                 'area_id' => 'nullable|exists:areas,id', // validasi area
+                'create_task' => 'nullable|in:ya,tidak',
+                'technician_id' => 'nullable|integer|exists:users,id',
+                'create_pic_notif' => 'nullable|in:ya,tidak',
             ];
 
             $messages = [
@@ -151,6 +165,7 @@ class MemberController extends Controller
                 'address.max' => 'Alamat maksimal 255 karakter',
                 'link_maps.url' => 'Link Maps harus berupa URL yang valid',
                 'area_id.exists' => 'Area tidak ditemukan',
+                'technician_id.exists' => 'Teknisi tidak ditemukan'
             ];
 
             $validator = Validator::make($data, $rules, $messages);
@@ -167,13 +182,72 @@ class MemberController extends Controller
             unset($data['id']);
             $data['password'] = Hash::make($request->password);
             $data['role'] = 'member';
-            User::create($data);
+            $newMember = User::create($data);
+            DB::commit();
+
+            // KIRIM NOTIFIKASI KE MEMBER
+            $appConfig = WebConfig::first();
+            $template = BroadcastTemplate::where('code', 'pra-register')->first();
+            // Mapping data untuk parsing
+            $dataTemplate = [
+                'member_name'     => $newMember->name,                // Nama member
+                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+            ];
+
+            // Parsing template menjadi pesan final
+            $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
+
+            // Kirim broadcast WA
+            BroadcastHelper::send($newMember->phone, $message);
+
+
+            // buat tiket teknisi jika create_task == 'ya'
+            if (!empty($data['create_task']) && $data['create_task'] === 'ya') {
+                $ticketData = [
+                    'type' => 'pemasangan',
+                    'status' => 'open',
+                    'member_id' => $newMember->id,
+                    'created_by' => auth()->id(),
+                    'cases' => 'Tiket pemasangan untuk member baru',
+                ];
+
+                // tambahkan teknisi jika ada
+                if (!empty($data['technician_id'])) {
+                    $ticketData['technician_id'] = $data['technician_id'];
+                }
+
+                Ticket::create($ticketData);
+
+                // 🔔 Kirim notifikasi WA ke teknisi jika create_pic_notif == 'ya'
+                if (!empty($data['create_pic_notif']) && $data['create_pic_notif'] == 'ya' && !empty($data['technician_id'])) {
+                    $technician = User::find($data['technician_id']);
+
+                    if ($technician) {
+                        $template = BroadcastTemplate::where('code', 'new-member-installation')->first();
+
+                        $data = [
+                            'technician_name' => $technician->name,
+                            'member_name'     => $newMember->name,
+                            'member_phone'    => "wa.me/" . preg_replace('/^08/', '628', $newMember->phone),
+                            'member_address'  => $newMember->address ?? '-',
+                            'member_maps'     => $newMember->link_maps ?? '-',
+                            'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                        ];
+
+                        $message = BroadcastHelper::parseTemplate($template->content, $data);
+                        BroadcastHelper::send($technician->phone, $message);
+                    }
+                }
+            }
+
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Berhasil update data member',
             ]);
         } catch (\Exception $err) {
+            DB::rollBack();
             return response()->json(
                 [
                     'status' => 'error',
@@ -352,6 +426,8 @@ class MemberController extends Controller
 
     public function destroy(Request $request)
     {
+        DB::beginTransaction();
+
         try {
             $validator = Validator::make(
                 $request->all(),
@@ -384,12 +460,34 @@ class MemberController extends Controller
                 );
             }
 
+            // DELETE TIKET
+            Ticket::where('member_id', $id)->delete();
+
+            // DELETE INVOICE
+            Invoice::where('user_id', $id)->delete();
+
+            // DELETE SUBSCRIPTION DEVICE
+            $subscription = Subscription::where('user_id', $id)->first();
+
+            // DELETE SUBSCRIPTION
+            if ($subscription) {
+                DeviceSubscription::where('subscription_id', $subscription->id)->delete();
+                $subscription->delete();
+            }
+
+            // DELETE ANNOUCEMENT
+            Announcement::where('user_id', $id)->delete();
+
+            // DELETE MEMBER
             $user->delete();
+            DB::commit();
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Data berhasil dihapus',
             ]);
         } catch (\Exception $err) {
+            DB::rollBack();
             return response()->json(
                 [
                     'status' => 'error',

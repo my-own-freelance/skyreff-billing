@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\BroadcastHelper;
 use App\Http\Controllers\Controller;
+use App\Models\BroadcastTemplate;
 use App\Models\Device;
 use App\Models\DeviceSubscription;
 use App\Models\Invoice;
@@ -10,6 +12,7 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\WebConfig;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,14 +26,13 @@ class SubscriptionController extends Controller
     public function index()
     {
         $title = 'Manage Subscription';
-        $technicians = User::where('role', 'teknisi')->get();
         $members = User::where('role', 'member')->get();
         $plans = Plan::all();
         $devices = Device::where('is_active', 'Y')->get();
         $pageUrl = "pages.dashboard.admin.subscription";
         if (auth()->user()->role == "member") $pageUrl = "pages.dashboard.member.subscription";
 
-        return view($pageUrl, compact('title', 'technicians', 'members', 'plans', 'devices'));
+        return view($pageUrl, compact('title', 'members', 'plans', 'devices'));
     }
 
     // API DataTable
@@ -238,10 +240,7 @@ class SubscriptionController extends Controller
                 'queue' => 'nullable|string',
                 'current_period_start' => 'nullable|date',
                 'current_period_end' => 'nullable|date|after_or_equal:current_period_start',
-                'next_invoice_at' => 'nullable|date',
-                'create_task' => 'nullable|in:ya,tidak',
-                'technician_id' => 'nullable|integer|exists:users,id',
-                'create_pic_notif' => 'nullable|in:ya,tidak',
+                'next_invoice_at' => 'nullable|date'
             ];
 
             $validator = Validator::make($data, $rules, [
@@ -271,7 +270,7 @@ class SubscriptionController extends Controller
             $subscriptionNumber = 'SUBS' . now()->format('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
 
             // buat subscription
-            $subscription = Subscription::create([
+            Subscription::create([
                 'user_id' => $data['user_id'],
                 'plan_id' => $data['plan_id'],
                 'subscription_number' => $subscriptionNumber,
@@ -285,59 +284,32 @@ class SubscriptionController extends Controller
                 'next_invoice_at' => $data['next_invoice_at'] ?? null,
             ]);
 
-            // buat tiket teknisi jika create_task == 'ya'
-            if (!empty($data['create_task']) && $data['create_task'] === 'ya') {
-                $ticketData = [
-                    'type' => 'pemasangan',
-                    'status' => 'open',
-                    'member_id' => $data['user_id'],
-                    'subscription_id' => $subscription->id,
-                    'created_by' => auth()->id(),
-                    'cases' => 'Tiket pemasangan untuk subscription baru',
-                ];
-
-                // tambahkan teknisi jika ada
-                if (!empty($data['technician_id'])) {
-                    $ticketData['technician_id'] = $data['technician_id'];
-                }
-
-                $ticket = Ticket::create($ticketData);
-
-                // 🔔 Kirim notifikasi WA ke teknisi jika create_pic_notif == 'ya'
-                if (!empty($data['create_pic_notif']) && $data['create_pic_notif'] == 'ya' && !empty($data['technician_id'])) {
-                    $technician = User::find($data['technician_id']);
-                    $member = User::find($data['user_id']);
-                    $plan = Plan::find($data['plan_id']);
-
-                    if ($technician && $member) {
-                        // link google maps dari latitude/longitude atau alamat
-                        $linkMap = $member->link_maps;
-
-                        $message = "Halo {$technician->name},\n\n";
-                        $message .= "Terdapat tiket pemasangan baru yang harus Anda tangani.\n\n";
-                        $message .= "*Member:* {$member->name}\n";
-                        $message .= "*Phone:* {$member->phone}\n";
-                        $message .= "*Alamat:* {$member->address}\n";
-                        if ($linkMap) {
-                            $message .= "*Lokasi: {$linkMap}\n";
-                        }
-                        $message .= "*Paket :* {$plan->name}\n";
-                        $message .= "*Subscription:* {$subscription->subscription_number}\n\n";
-                        $message .= "Silakan segera lakukan follow up pemasangan.\nTerima kasih.";
-
-                        $payload = [
-                            "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
-                            "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
-                            "to" => preg_replace('/^08/', '628', $technician->phone),
-                            "message" => $message,
-                        ];
-
-                        Http::post('https://app.saungwa.com/api/create-message', $payload);
-                    }
-                }
-            }
 
             DB::commit();
+
+            // SEND NOTIFIKASI BROADCAST TEMPLATE
+            // Ambil template dari database (misal code 'aktivasi-paket')
+            $template = BroadcastTemplate::where('code', 'aktivasi-paket')->first();
+            $appConfig = WebConfig::first();
+            $member = User::where('id', $data['user_id'])->first();
+            $plan = Plan::where("id", $data['plan_id'])->first();
+
+            // Mapping data untuk parsing
+            $dataTemplate = [
+                'member_name'        => $member->name,                  // Nama member
+                'plan_name'          => $plan->name,      // Nama paket langganan
+                'plan_price'         => "Rp " . number_format($plan->price, 0, ',', '.'),
+                'subscription_number' => $subscriptionNumber, // Nomor langganan
+                'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+            ];
+
+            // Parsing template menjadi pesan final
+            $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
+
+            // Kirim broadcast WA
+            BroadcastHelper::send($member->phone, $message);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Subscription berhasil dibuat',
@@ -401,30 +373,6 @@ class SubscriptionController extends Controller
                 'current_period_end' => $data['current_period_end'] ?? $subscription->current_period_end,
                 'next_invoice_at' => $data['next_invoice_at'] ?? $subscription->next_invoice_at,
             ]);
-
-            // buat tiket teknisi jika create_task == 'ya'
-            if (!empty($data['create_task']) && $data['create_task'] === 'ya') {
-                $ticketData = [
-                    'type' => 'pemasangan',
-                    'status' => 'open',
-                    'member_id' => $data['user_id'],
-                    'subscription_id' => $subscription->id,
-                    'created_by' => auth()->id(),
-                    'cases' => 'Tiket Update pemasangan untuk subscription lama',
-                ];
-
-                // tambahkan teknisi jika ada
-                if (!empty($data['technician_id'])) {
-                    $ticketData['technician_id'] = $data['technician_id'];
-                }
-
-                $ticket = Ticket::create($ticketData);
-
-                // --- next development: kirim notifikasi WA ke teknisi jika create_pic_notif == 'ya'
-                // if(!empty($data['create_pic_notif']) && $data['create_pic_notif'] == 'ya'){
-                //     // logic kirim notifikasi WA ke teknisi
-                // }
-            }
 
             DB::commit();
 
@@ -523,8 +471,8 @@ class SubscriptionController extends Controller
             // Hitung amount dari plan
             $amount = $subscription->plan->price ?? 0;
 
-            // Tentukan due date (misalnya 7 hari setelah tanggal buat invoice)
-            $dueDate = now()->addDays(7);
+            // Tentukan due date sesuai dengan subcription end
+            $dueDate = $subscription->current_period_end;
 
             // Buat invoice
             $invoice = Invoice::create([
@@ -560,35 +508,40 @@ class SubscriptionController extends Controller
 
             DB::commit();
 
-            // 🔔 Kirim notifikasi WA ke member
+            // 🔔 SEND NOTIFIKASI BROADCAST TEMPLATE
             $member = $subscription->user;
-            $message = "Halo {$member->name},\n\n";
-            $message .= "Invoice baru telah terbit untuk subscription Anda.\n\n";
-            $message .= "*Nomor Invoice:* {$invoiceNumber}\n";
-            $message .= "*Jumlah:* Rp " . number_format($amount, 0, ',', '.') . "\n";
-            $message .= "*Paket :* {$subscription->plan->name}\n";
-            $message .= "*Periode:* " . Carbon::parse($invoice->invoice_period_start)
+            $periodStart = Carbon::parse($invoice->invoice_period_start)
                 ->timezone('Asia/Jakarta') // atur timezone ke WIB
                 ->locale('id') // bahasa Indonesia
-                ->translatedFormat('d M Y')
-                . " s/d " . Carbon::parse($invoice->invoice_period_end)
+                ->translatedFormat('d M Y');
+            $periodEnd = Carbon::parse($invoice->invoice_period_end)
                 ->timezone('Asia/Jakarta') // atur timezone ke WIB
                 ->locale('id') // bahasa Indonesia
-                ->translatedFormat('d M Y') . "\n";
-            $message .= "*Jatuh tempo:* " . Carbon::parse($invoice->due_date)
+                ->translatedFormat('d M Y');
+            $dueDate = Carbon::parse($invoice->due_date)
                 ->timezone('Asia/Jakarta') // atur timezone ke WIB
                 ->locale('id') // bahasa Indonesia
-                ->translatedFormat('d M Y') . "\n\n";
-            $message .= "Silakan lakukan pembayaran tepat waktu. Terima kasih.";
+                ->translatedFormat('d M Y');
 
-            $payload = [
-                "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
-                "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
-                "to" => preg_replace('/^08/', '628', $member->phone),
-                "message" => $message,
+            $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-baru")->first();
+            $appConfig = WebConfig::first();
+            // Mapping data untuk parsing
+            $dataTemplate = [
+                'member_name'     => $member->name,
+                'invoice_number'  => $invoiceNumber,
+                'plan_name'       => $subscription->plan->name,
+                'invoice_amount'  => "Rp " . number_format($amount, 0, ',', '.'),
+                'period'          => "{$periodStart} s/d {$periodEnd}",
+                'invoice_due_date' => $dueDate,
+                'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
             ];
 
-            Http::post('https://app.saungwa.com/api/create-message', $payload);
+            // Parsing template
+            $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
+
+            // Kirim broadcast WA
+            BroadcastHelper::send($member->phone, $message);
 
             return response()->json([
                 'status' => 'success',

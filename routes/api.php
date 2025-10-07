@@ -4,6 +4,7 @@ use App\Http\Controllers\Dashboard\AreaController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Dashboard\AnnountcementController;
 use App\Http\Controllers\Dashboard\BroadcastController;
+use App\Http\Controllers\Dashboard\BroadcastTemplateController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DeviceController;
 use App\Http\Controllers\Dashboard\DeviceFaqController;
@@ -141,6 +142,12 @@ Route::group(['middleware' => 'check.auth'], function () {
             });
 
             Route::post('/broadcast/whatsapp-send', [BroadcastController::class, 'send'])->name('broadcast.send');
+
+             // BROADCAST TEMPLATE
+            Route::group(['prefix' => 'broadcast-template'], function () {
+                Route::get('{id}/detail', [BroadcastTemplateController::class, 'getDetail'])->name('broadcast-template.detail');
+                Route::post('update', [BroadcastTemplateController::class, 'update'])->name('broadcast-template.update');
+            });
         });
     });
 

@@ -138,6 +138,37 @@
                                 <option value="N">Disable</option>
                             </select>
                         </div>
+                        <!-- Tiket Teknisi -->
+                        <div class="form-group" id="divTask">
+                            <label for="fCreateTask">Buat Tiket Teknisi</label>
+                            <select id="fCreateTask" name="fCreateTask" class="form-control">
+                                <option value="tidak">Tidak</option>
+                                <option value="ya">Ya</option>
+                            </select>
+                        </div>
+
+                        <!-- Pilih Teknisi dan Notifikasi -->
+                        <div class="form-group" id="divTechnician" style="display:none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="fTechnician">Pilih Teknisi</label>
+                                    <select id="fTechnician" name="fTechnician" class="form-control select2">
+                                        <option value="">Pilih Teknisi</option>
+                                        @foreach ($technicians as $tech)
+                                            <option value="{{ $tech->id }}">{{ $tech->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fTechnicianNotif">Kirim Notif Ke Teknisi</label>
+                                    <select id="fTechnicianNotif" name="fTechnicianNotif" class="form-control">
+                                        <option value="ya">Ya</option>
+                                        <option value="tidak">Tidak</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <button class="btn btn-sm btn-primary" type="submit" id="submit">
                                 <i class="ti-save"></i><span>Simpan</span>
@@ -239,6 +270,7 @@
             $("#formEditable").attr('data-action', 'add').fadeIn(200);
             $("#boxTable").removeClass("col-md-12").addClass("col-md-8");
             $("#name").focus();
+            $('#divTask').slideDown();
         }
 
         function closeForm() {
@@ -257,6 +289,9 @@
                 success: function(res) {
                     $("#formEditable").attr("data-action", "update").fadeIn(200, function() {
                         $("#boxTable").removeClass("col-md-12").addClass("col-md-8");
+                        $('#divTechnician').slideUp();
+                        $('#divTask').slideUp();
+
                         let d = res.data;
                         $("#id").val(d.id);
                         $("#name").val(d.name);
@@ -288,6 +323,10 @@
             formData.append("link_maps", $("#link_maps").val());
             formData.append("password", $("#password").val());
             formData.append("is_active", $("#is_active").val());
+            // TIKET TEKNISI
+            formData.append("create_task", $("#fCreateTask").val());
+            formData.append("technician_id", $("#fTechnician").val());
+            formData.append("create_pic_notif", $("#fTechnicianNotif").val());
 
             saveData(formData, $("#formEditable").attr("data-action"));
             return false;
@@ -365,5 +404,17 @@
                 }
             })
         }
+
+        // TEKNISI
+        // Toggle divTechnician berdasarkan fCreateTask
+        $('#fCreateTask').on('change', function() {
+            if ($(this).val() === 'ya') {
+                $('#divTechnician').slideDown();
+            } else {
+                $('#divTechnician').slideUp();
+                $('#fTechnician').val('');
+                $('#fTechnicianNotif').val('ya');
+            }
+        });
     </script>
 @endpush

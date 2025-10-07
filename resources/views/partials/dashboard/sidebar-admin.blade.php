@@ -95,6 +95,12 @@
                         <p>Broadcast</p>
                     </a>
                 </li>
+                <li class="nav-item ml-3 {{ $routename == 'broadcast-template' ? 'active' : '' }}">
+                    <a href="{{ route('broadcast-template') }}">
+                        <i class="fas fa-layer-group"></i>{{-- Broadcast Template --}}
+                        <p>Broadcast Template</p>
+                    </a>
+                </li>
                 <li class="nav-item ml-3 {{ $routename == 'announcement' ? 'active' : '' }}">
                     <a href="{{ route('announcement') }}">
                         <i class="fas fa-bell"></i> {{-- Announcement --}}

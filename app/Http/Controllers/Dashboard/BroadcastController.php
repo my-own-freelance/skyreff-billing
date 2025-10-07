@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Helpers\BroadcastHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Area;
 use App\Models\User;
@@ -69,12 +70,7 @@ class BroadcastController extends Controller
 
             // Kirim ke API WA satu per satu
             foreach ($numbers as $phone) {
-                Http::post('https://app.saungwa.com/api/create-message', [
-                    "appkey" => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
-                    "authkey" => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
-                    "to" => $phone,
-                    "message" => $message,
-                ]);
+                BroadcastHelper::send($phone, $message);
             }
 
             return response()->json([
