@@ -94,25 +94,27 @@ class GenerateInvoices extends Command
                     ->locale('id') // bahasa Indonesia
                     ->translatedFormat('d M Y');
 
-                $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-baru")->first();
-                $appConfig = WebConfig::first();
-                // Mapping data untuk parsing
-                $dataTemplate = [
-                    'member_name'     => $member->name,
-                    'invoice_number'  => $invoiceNumber,
-                    'plan_name'       => $subscription->plan->name,
-                    'invoice_amount'  => "Rp " . number_format($amount, 0, ',', '.'),
-                    'period'          => "{$periodStart} s/d {$periodEnd}",
-                    'invoice_due_date' => $dueDate,
-                    'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
-                    'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
-                ];
+                $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-baru")->where('is_active', 'Y')->first();
+                if ($templateInvoiceBaru) {
+                    $appConfig = WebConfig::first();
+                    // Mapping data untuk parsing
+                    $dataTemplate = [
+                        'member_name'     => $member->name,
+                        'invoice_number'  => $invoiceNumber,
+                        'plan_name'       => $subscription->plan->name,
+                        'invoice_amount'  => "Rp " . number_format($amount, 0, ',', '.'),
+                        'period'          => "{$periodStart} s/d {$periodEnd}",
+                        'invoice_due_date' => $dueDate,
+                        'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                        'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                    ];
 
-                // Parsing template
-                $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
+                    // Parsing template
+                    $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
 
-                // Kirim broadcast WA
-                BroadcastHelper::send($member->phone, $message);
+                    // Kirim broadcast WA
+                    BroadcastHelper::send($member->phone, $message);
+                }
 
                 $this->info("✅ Invoice {$invoiceNumber} created for subscription {$subscription->id}");
             } catch (\Throwable $e) {

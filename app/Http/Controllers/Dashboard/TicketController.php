@@ -270,22 +270,23 @@ class TicketController extends Controller
                 $technician = User::find($data['technician_id']);
                 if ($technician) {
                     // Ambil template tiket teknisi dari DB (misal code 'technician-ticket')
-                    $template = BroadcastTemplate::where('code', 'technician-ticket')->first();
+                    $template = BroadcastTemplate::where('code', 'technician-ticket')->where('is_active', 'Y')->first();
+                    if ($template) {
+                        // Mapping data
+                        $dataTemplate = [
+                            'technician_name' => $technician->name,
+                            'ticket_type'     => $ticket->type,
+                            'ticket_cases'    => $ticket->cases,
+                            'member_name'     => $member->name ?? '-',
+                            'member_phone'     => $member ? 'wa.me/' . preg_replace('/^08/', '628', $member->phone) : '-',
+                        ];
 
-                    // Mapping data
-                    $dataTemplate = [
-                        'technician_name' => $technician->name,
-                        'ticket_type'     => $ticket->type,
-                        'ticket_cases'    => $ticket->cases,
-                        'member_name'     => $member->name ?? '-',
-                        'member_phone'     => $member ? 'wa.me/' . preg_replace('/^08/', '628', $member->phone) : '-',
-                    ];
+                        // Parse template
+                        $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
 
-                    // Parse template
-                    $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
-
-                    // Kirim WA
-                    BroadcastHelper::send($technician->phone, $message);
+                        // Kirim WA
+                        BroadcastHelper::send($technician->phone, $message);
+                    }
                 }
             }
 

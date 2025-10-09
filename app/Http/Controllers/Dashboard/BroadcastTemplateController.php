@@ -55,11 +55,14 @@ class BroadcastTemplateController extends Controller
             $rules = [
                 'id' => 'required|integer|exists:broadcast_templates,id',
                 'content' => 'nullable|string',
+                'is_active' => 'required|string|in:Y,N',
             ];
 
             $messages = [
                 'id.required' => 'Data ID harus diisi',
                 'id.exists' => 'Data tidak ditemukan',
+                'is_active' => 'Status harus diisi',
+                'is_active.in' => 'Status tidak sesuai',
             ];
 
             $validator = Validator::make($data, $rules, $messages);

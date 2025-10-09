@@ -29,7 +29,13 @@
                                         @endforeach
                                     </select>
                                 </div>
-
+                                <div class="mb-3">
+                                    <label for="statusTemplate">Status</label>
+                                    <select id="statusTemplate" name="" class="form-control">
+                                        <option value="Y">Aktif</option>
+                                        <option value="N">Disable</option>
+                                    </select>
+                                </div>
                                 <div class="mb-3 position-relative">
                                     <label for="content">Text</label>
                                     <button type="button" class="position-absolute btn btn-icon btn-link"
@@ -163,6 +169,7 @@
                     let d = msg.data;
                     $('#fId').val(d.id);
                     $('#content').val(d.content);
+                    $('#statusTemplate').val(d.is_active).change();
                 },
                 error: function(err) {
                     console.log("error :", err);
@@ -187,6 +194,7 @@
             let dataToSend = {
                 id: $('#fId').val(),
                 name: $('#tipeTemplate').find('option:selected').text(),
+                is_active: $('#statusTemplate').val(),
                 content: $('#content').val()
             }
             saveData(dataToSend)

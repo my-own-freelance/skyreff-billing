@@ -289,26 +289,28 @@ class SubscriptionController extends Controller
 
             // SEND NOTIFIKASI BROADCAST TEMPLATE
             // Ambil template dari database (misal code 'aktivasi-paket')
-            $template = BroadcastTemplate::where('code', 'aktivasi-paket')->first();
-            $appConfig = WebConfig::first();
-            $member = User::where('id', $data['user_id'])->first();
-            $plan = Plan::where("id", $data['plan_id'])->first();
+            $template = BroadcastTemplate::where('code', 'aktivasi-paket')->where('is_active', 'Y')->first();
+            if ($template) {
+                $appConfig = WebConfig::first();
+                $member = User::where('id', $data['user_id'])->first();
+                $plan = Plan::where("id", $data['plan_id'])->first();
 
-            // Mapping data untuk parsing
-            $dataTemplate = [
-                'member_name'        => $member->name,                  // Nama member
-                'plan_name'          => $plan->name,      // Nama paket langganan
-                'plan_price'         => "Rp " . number_format($plan->price, 0, ',', '.'),
-                'subscription_number' => $subscriptionNumber, // Nomor langganan
-                'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
-                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
-            ];
+                // Mapping data untuk parsing
+                $dataTemplate = [
+                    'member_name'        => $member->name,                  // Nama member
+                    'plan_name'          => $plan->name,      // Nama paket langganan
+                    'plan_price'         => "Rp " . number_format($plan->price, 0, ',', '.'),
+                    'subscription_number' => $subscriptionNumber, // Nomor langganan
+                    'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                    'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                ];
 
-            // Parsing template menjadi pesan final
-            $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
+                // Parsing template menjadi pesan final
+                $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
 
-            // Kirim broadcast WA
-            BroadcastHelper::send($member->phone, $message);
+                // Kirim broadcast WA
+                BroadcastHelper::send($member->phone, $message);
+            }
 
             return response()->json([
                 'status' => 'success',
@@ -523,25 +525,27 @@ class SubscriptionController extends Controller
                 ->locale('id') // bahasa Indonesia
                 ->translatedFormat('d M Y');
 
-            $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-baru")->first();
-            $appConfig = WebConfig::first();
-            // Mapping data untuk parsing
-            $dataTemplate = [
-                'member_name'     => $member->name,
-                'invoice_number'  => $invoiceNumber,
-                'plan_name'       => $subscription->plan->name,
-                'invoice_amount'  => "Rp " . number_format($amount, 0, ',', '.'),
-                'period'          => "{$periodStart} s/d {$periodEnd}",
-                'invoice_due_date' => $dueDate,
-                'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
-                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
-            ];
+            $templateInvoiceBaru = BroadcastTemplate::where("code", "invoice-baru")->where('is_active', 'Y')->first();
+            if ($templateInvoiceBaru) {
+                $appConfig = WebConfig::first();
+                // Mapping data untuk parsing
+                $dataTemplate = [
+                    'member_name'     => $member->name,
+                    'invoice_number'  => $invoiceNumber,
+                    'plan_name'       => $subscription->plan->name,
+                    'invoice_amount'  => "Rp " . number_format($amount, 0, ',', '.'),
+                    'period'          => "{$periodStart} s/d {$periodEnd}",
+                    'invoice_due_date' => $dueDate,
+                    'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                    'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                ];
 
-            // Parsing template
-            $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
+                // Parsing template
+                $message = BroadcastHelper::parseTemplate($templateInvoiceBaru->content, $dataTemplate);
 
-            // Kirim broadcast WA
-            BroadcastHelper::send($member->phone, $message);
+                // Kirim broadcast WA
+                BroadcastHelper::send($member->phone, $message);
+            }
 
             return response()->json([
                 'status' => 'success',

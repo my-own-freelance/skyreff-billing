@@ -187,20 +187,21 @@ class MemberController extends Controller
 
             // KIRIM NOTIFIKASI KE MEMBER
             $appConfig = WebConfig::first();
-            $template = BroadcastTemplate::where('code', 'pra-register')->first();
-            // Mapping data untuk parsing
-            $dataTemplate = [
-                'member_name'     => $newMember->name,                // Nama member
-                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
-                'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
-            ];
-
-            // Parsing template menjadi pesan final
-            $message = BroadcastHelper::parseTemplate($template->content, $dataTemplate);
-
-            // Kirim broadcast WA
-            BroadcastHelper::send($newMember->phone, $message);
-
+            $templatePraRegister = BroadcastTemplate::where('code', 'pra-register')->where('is_active', 'Y')->first();
+            if($templatePraRegister) {
+                // Mapping data untuk parsing
+                $dataTemplate = [
+                    'member_name'     => $newMember->name,                // Nama member
+                    'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                    'support_contact' => 'wa.me/' . preg_replace('/^08/', '628', $appConfig->phone_number),
+                ];
+    
+                // Parsing template menjadi pesan final
+                $message = BroadcastHelper::parseTemplate($templatePraRegister->content, $dataTemplate);
+    
+                // Kirim broadcast WA
+                BroadcastHelper::send($newMember->phone, $message);
+            }
 
             // buat tiket teknisi jika create_task == 'ya'
             if (!empty($data['create_task']) && $data['create_task'] === 'ya') {
@@ -224,19 +225,21 @@ class MemberController extends Controller
                     $technician = User::find($data['technician_id']);
 
                     if ($technician) {
-                        $template = BroadcastTemplate::where('code', 'new-member-installation')->first();
+                        $templateNewInstallation = BroadcastTemplate::where('code', 'new-member-installation')->where('is_active', 'Y')->first();
+                        if($templateNewInstallation) {
+                            $data = [
+                                'technician_name' => $technician->name,
+                                'member_name'     => $newMember->name,
+                                'member_phone'    => "wa.me/" . preg_replace('/^08/', '628', $newMember->phone),
+                                'member_address'  => $newMember->address ?? '-',
+                                'member_maps'     => $newMember->link_maps ?? '-',
+                                'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
+                            ];
+    
+                            $message = BroadcastHelper::parseTemplate($templateNewInstallation->content, $data);
+                            BroadcastHelper::send($technician->phone, $message);
+                        }
 
-                        $data = [
-                            'technician_name' => $technician->name,
-                            'member_name'     => $newMember->name,
-                            'member_phone'    => "wa.me/" . preg_replace('/^08/', '628', $newMember->phone),
-                            'member_address'  => $newMember->address ?? '-',
-                            'member_maps'     => $newMember->link_maps ?? '-',
-                            'company_name'    => $appConfig->web_title, // ganti sesuai nama perusahaan
-                        ];
-
-                        $message = BroadcastHelper::parseTemplate($template->content, $data);
-                        BroadcastHelper::send($technician->phone, $message);
                     }
                 }
             }
