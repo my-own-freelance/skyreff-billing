@@ -16,7 +16,7 @@ class BroadcastHelper
   public static function send($to, $message)
   {
     $payload = [
-      "appkey"   => "6879d35c-268e-4e2a-ae43-15528fc86ba4",
+      "appkey"   => "80feae0d-f841-4f3a-a7b3-5349ba2d73e0",
       "authkey"  => "j8znJb83n04XeenAPuVEOxZWRKX62DWTHpFEHaRgP1WtdUR972",
       "to"       => preg_replace('/^08/', '628', $to), // ubah ke format 62
       "message"  => $message,
