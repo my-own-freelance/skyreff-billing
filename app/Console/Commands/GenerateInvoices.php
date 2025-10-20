@@ -41,8 +41,8 @@ class GenerateInvoices extends Command
                 // Hitung jumlah dari plan
                 $amount = $subscription->plan->price ?? 0;
 
-                // Tentukan due date (3 hari setelah invoice keluar)
-                $dueDate = now()->addDays(3);
+                // Tentukan due date (berdasarkan data di subscription atau 10 hari setelah invoice keluar)
+                $dueDate = $subscription->expired_invoice_at ?? Carbon::now()->addDays(10);
 
                 // Buat invoice baru
                 $invoice = Invoice::create([
@@ -67,13 +67,27 @@ class GenerateInvoices extends Command
                         'user_id' => $subscription->user->id ?? null,
                         'user_name' => $subscription->user->name ?? null,
                         'user_phone' => $subscription->user->phone ?? null,
+                        'invoice_at'=> $subscription->next_invoice_at,
+                        'expired_at' => $subscription->expired_invoice_at
                     ]),
                 ]);
 
-                // Update next_invoice_at → 1 bulan berikutnya
+                // Update current periode start/end, next_invoice_at, dan expired_invoice_at → 1 bulan berikutnya
                 $subscription->next_invoice_at = $subscription->next_invoice_at
-                    ? Carbon::parse($subscription->next_invoice_at)->addMonth()
-                    : now()->addMonth();
+                    ? Carbon::parse($subscription->next_invoice_at)->addMonthNoOverflow()
+                    : now()->addMonthNoOverflow();
+
+                $subscription->expired_invoice_at = $subscription->expired_invoice_at
+                    ? Carbon::parse($subscription->expired_invoice_at)->addMonthNoOverflow()
+                    : now()->addMonthNoOverflow();
+
+                $subscription->current_period_start = $subscription->current_period_start
+                    ? Carbon::parse($subscription->current_period_start)->addMonthNoOverflow()
+                    : now()->addMonthNoOverflow();
+
+                $subscription->current_period_end = $subscription->current_period_end
+                    ? Carbon::parse($subscription->current_period_end)->addMonthNoOverflow()
+                    : now()->addMonthNoOverflow();
 
                 $subscription->save();
 

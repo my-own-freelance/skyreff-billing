@@ -19,6 +19,7 @@ class Subscription extends Model
         'current_period_start',
         'current_period_end',
         'next_invoice_at',
+        'expired_invoice_at',
         'plan_id',
         'user_id',
         'meta',
@@ -28,6 +29,7 @@ class Subscription extends Model
         'current_period_start' => 'datetime',
         'current_period_end'   => 'datetime',
         'next_invoice_at'      => 'datetime',
+        'expired_invoice_at'   => 'datetime',
         'meta'                 => 'array',
     ];
 

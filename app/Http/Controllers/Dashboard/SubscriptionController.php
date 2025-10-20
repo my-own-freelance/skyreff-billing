@@ -175,6 +175,13 @@ class SubscriptionController extends Controller
                     ->translatedFormat('d M Y H:i')
                     : '-';
 
+                $item['expired_invoice'] = $item->expired_invoice_at
+                    ? Carbon::parse($item->expired_invoice_at)
+                    ->timezone('Asia/Jakarta')
+                    ->locale('id')
+                    ->translatedFormat('d M Y H:i')
+                    : '-';
+
                 return $item;
             });
 
@@ -240,7 +247,8 @@ class SubscriptionController extends Controller
                 'queue' => 'nullable|string',
                 'current_period_start' => 'nullable|date',
                 'current_period_end' => 'nullable|date|after_or_equal:current_period_start',
-                'next_invoice_at' => 'nullable|date'
+                'next_invoice_at' => 'nullable|date',
+                'expired_invoice_at' => 'nullable|date|after_or_equal:next_invoice_at',
             ];
 
             $validator = Validator::make($data, $rules, [
@@ -282,6 +290,7 @@ class SubscriptionController extends Controller
                 'current_period_start' => $data['current_period_start'] ?? null,
                 'current_period_end' => $data['current_period_end'] ?? null,
                 'next_invoice_at' => $data['next_invoice_at'] ?? null,
+                'expired_invoice_at' => $data['expired_invoice_at'] ?? null
             ]);
 
 
@@ -341,11 +350,8 @@ class SubscriptionController extends Controller
                 'queue' => 'nullable|string',
                 'current_period_start' => 'nullable|date',
                 'current_period_end' => 'nullable|date|after_or_equal:current_period_start',
-
-                // tambahan validasi untuk tiket teknisi
-                'fCreateTask' => 'nullable|in:ya,tidak',
-                'fTechnician' => 'nullable|integer|exists:technicians,id',
-                'fTechnicianNotif' => 'nullable|in:ya,tidak',
+                'next_invoice_at' => 'nullable|date',
+                'expired_invoice_at' => 'nullable|date|after_or_equal:next_invoice_at',
             ];
 
             $validator = Validator::make($data, $rules, [
@@ -374,6 +380,7 @@ class SubscriptionController extends Controller
                 'current_period_start' => $data['current_period_start'] ?? $subscription->current_period_start,
                 'current_period_end' => $data['current_period_end'] ?? $subscription->current_period_end,
                 'next_invoice_at' => $data['next_invoice_at'] ?? $subscription->next_invoice_at,
+                'expired_invoice_at' => $data['expired_invoice_at'] ?? $subscription->expired_invoice_at,
             ]);
 
             DB::commit();
@@ -474,7 +481,7 @@ class SubscriptionController extends Controller
             $amount = $subscription->plan->price ?? 0;
 
             // Tentukan due date (3 hari setelah invoice keluar)
-            $dueDate = now()->addDays(3);
+            $dueDate = $subscription->expired_invoice_at ?? now()->addDays(3);
 
             // Buat invoice
             $invoice = Invoice::create([
@@ -499,13 +506,28 @@ class SubscriptionController extends Controller
                     'user_id' => $subscription->user->id ?? null,
                     'user_name' => $subscription->user->name ?? null,
                     'user_phone' => $subscription->user->phone ?? null,
+                    'invoice_at' => $subscription->next_invoice_at,
+                    'expired_at' => $subscription->expired_invoice_at
                 ]),
             ]);
 
-            // 🔥 Update subscription.next_invoice_at ke 1 bulan setelah next_invoice_at lama
+            // Update current periode start/end, next_invoice_at, dan expired_invoice_at → 1 bulan berikutnya
             $subscription->next_invoice_at = $subscription->next_invoice_at
-                ? Carbon::parse($subscription->next_invoice_at)->addMonth()
-                : now()->addMonth(); // fallback kalau null
+                ? Carbon::parse($subscription->next_invoice_at)->addMonthNoOverflow()
+                : now()->addMonthNoOverflow();
+
+            $subscription->expired_invoice_at = $subscription->expired_invoice_at
+                ? Carbon::parse($subscription->expired_invoice_at)->addMonthNoOverflow()
+                : now()->addMonthNoOverflow();
+
+            $subscription->current_period_start = $subscription->current_period_start
+                ? Carbon::parse($subscription->current_period_start)->addMonthNoOverflow()
+                : now()->addMonthNoOverflow();
+
+            $subscription->current_period_end = $subscription->current_period_end
+                ? Carbon::parse($subscription->current_period_end)->addMonthNoOverflow()
+                : now()->addMonthNoOverflow();
+
             $subscription->save();
 
             DB::commit();

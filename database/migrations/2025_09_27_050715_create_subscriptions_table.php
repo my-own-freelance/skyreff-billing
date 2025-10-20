@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestamp('current_period_start')->nullable();
             $table->timestamp('current_period_end')->nullable();
             $table->timestamp('next_invoice_at')->nullable();
+            $table->timestamp('expired_invoice_at')->nullable();
             $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->json('meta')->nullable();

@@ -28,11 +28,12 @@
                                     <th class="all">Status</th>
                                     <th class="all">Periode</th>
                                     <th class="all">Next Invoice</th>
+                                    <th class="all">Expired Invoice</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan="9" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -277,19 +277,20 @@ class InvoiceController extends Controller
                 $updateData['paid_at'] = Carbon::now('Asia/Jakarta');
 
                 // update subscription current period
-                if ($invoice->subscription) {
-                    $subscription = $invoice->subscription;
+                // if ($invoice->subscription) {
+                //     $subscription = $invoice->subscription;
 
-                    // Jika subscription belum punya periode, gunakan periode invoice
-                    $currentStart = $subscription->current_period_start ?? $invoice->invoice_period_start ?? Carbon::now('Asia/Jakarta');
-                    $currentEnd = $subscription->current_period_end ?? $invoice->invoice_period_end ?? Carbon::now('Asia/Jakarta')->addMonth();
+                //     // Jika subscription belum punya periode, gunakan periode invoice
+                //     $currentStart = $subscription->current_period_start ?? $invoice->invoice_period_start ?? Carbon::now('Asia/Jakarta');
+                //     $currentEnd = $subscription->current_period_end ?? $invoice->invoice_period_end ?? Carbon::now('Asia/Jakarta')->addMonth();
 
-                    // Tambahkan 1 bulan dari periode lama
-                    $subscription->current_period_start = Carbon::parse($currentStart)->addMonth();
-                    $subscription->current_period_end = Carbon::parse($currentEnd)->addMonth();
+                //     // Tambahkan 1 bulan dari periode lama
+                //     $subscription->current_period_start = Carbon::parse(time: $currentStart)->addMonth();
+                //     $subscription->current_period_end = Carbon::parse($currentEnd)->addMonth();
 
-                    $subscription->save();
-                }
+                //     $subscription->save();
+                // }
+                // TIDAK USAH UPDATE SUBSCRIPTION, KARENA SUBSCRIPTION SUDAH DI UPDATE KETIKA MEMBUAT INVOICE
             }
 
             $invoice->update($updateData);

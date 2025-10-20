@@ -86,11 +86,12 @@
                                     <th class="all">Status</th>
                                     <th class="all">Periode</th>
                                     <th class="all">Next Invoice</th>
+                                    <th class="all">Expired Invoice</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="9" class="text-center"><small>Tidak Ada Data</small></td>
+                                    <td colspan="10" class="text-center"><small>Tidak Ada Data</small></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -200,6 +201,15 @@
                             <input class="form-control" id="next_invoice_at" type="datetime-local"
                                 name="next_invoice_at" />
                             <small class="text-muted">Tanggal ini akan digunakan untuk generate invoice otomatis</small>
+                        </div>
+
+                        <!-- Expired Invoice -->
+                        <div class="form-group">
+                            <label for="expired_invoice_at">Expired Invoice</label>
+                            <input class="form-control" id="expired_invoice_at" type="datetime-local"
+                                name="expired_invoice_at" />
+                            <small class="text-muted">Tanggal ini akan digunakan untuk expired invoice otomatis. pastikan
+                                tgk setelah next invoice</small>
                         </div>
 
                         <!-- Submit -->
@@ -338,6 +348,9 @@
                     },
                     {
                         data: "next_invoice"
+                    },
+                    {
+                        data: "expired_invoice"
                     }
                 ],
                 pageLength: 25,
@@ -413,6 +426,7 @@
                         $("#current_period_start").val(formatDateTimeLocal(d.current_period_start));
                         $("#current_period_end").val(formatDateTimeLocal(d.current_period_end));
                         $("#next_invoice_at").val(formatDateTimeLocal(d.next_invoice_at));
+                        $("#expired_invoice_at").val(formatDateTimeLocal(d.expired_invoice_at));
                     })
                 },
 
@@ -441,6 +455,7 @@
                 current_period_start: $("#current_period_start").val(),
                 current_period_end: $("#current_period_end").val(),
                 next_invoice_at: $("#next_invoice_at").val(),
+                expired_invoice_at: $("#expired_invoice_at").val(),
             };
 
             saveData(action, payload);

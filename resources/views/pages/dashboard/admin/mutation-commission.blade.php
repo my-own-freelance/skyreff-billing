@@ -149,8 +149,6 @@
                 <div class="modal-body">
                     <p id="bankTarget"></p>
                     <p id="amount"></p>
-                    <p id="admin"></p>
-                    <p id="totalAmount"></p>
                     <p id="reasonReject"></p>
                     <img alt="" id="proofImg">
                 </div>
@@ -273,9 +271,7 @@
                     $("#modalDetailTitle").html("DETAIL WITHDRAW")
                     $("#bankTarget").html(`Tujuan : ${data.bank_name} (${data.bank_account})`);
                     $("#amount").html(`Nominal : ${data.amount}`);
-                    $("#admin").html(`Admin : ${data.admin}`);
-                    $("#totalAmount").html(`Total : ${data.total_amount}`);
-                    $("#reasonReject").html(`Catatan : ${data.remark}`);
+                    $("#reasonReject").html(`Catatan : ${data.remark ?? ''}`);
                 }
 
                 if (status == "SHOW-REASON-REJECT") {
@@ -287,8 +283,6 @@
                     $("#modalDetailTitle").html("BUKTI PEMBAYARAN TRANSFER")
                     $("#bankTarget").html(`TUJUAN : ${data.bank_name} (${data.bank_account})`);
                     $("#amount").html(`Nominal : ${data.amount}`);
-                    $("#admin").html(`Admin : ${data.admin}`);
-                    $("#totalAmount").html(`Total : ${data.total_amount}`);
                     $("#reasonReject").html(`Catatan : ${data.remark}`);
                     if (data.proof_of_payment) {
                         $("#proofImg").attr("src", data.proof_of_payment).attr("width", "100%");
@@ -303,8 +297,6 @@
             $("#reasonReject").html("");
             $("#bankTarget").html("");
             $("#amount").html("");
-            $("#admin").html("");
-            $("#totalAmount").html("");
             $("#proofImg").attr("src", "");
         });
 
