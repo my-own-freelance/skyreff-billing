@@ -30,7 +30,7 @@
             <div class="logo-header" data-background-color="{{ $logoColor }}">
                 <a href="{{ $user->role == 'admin' ? route('dashboard.admin') : ($user->role == 'teknisi' ? route('dashboard.teknisi') : route('dashboard.member')) }}"
                     class="logo">
-                    <h4 class="text-white mt-3" style="font-weight: 800!important">SKYREFF BILLING</h4>
+                    <h4 class="text-white mt-3" style="font-weight: 800!important">{{$webTitle}}</h4>
                 </a>
                 <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse"
                     data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
